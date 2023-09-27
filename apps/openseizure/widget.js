@@ -38,18 +38,18 @@
 
     NRF.setServices({
 	"a19585e9-0001-39d0-015f-b3e2b9a0c854" : {
-	    "a19585e9-0002-39d0-015f-b3e2b9a0c854" : {
+    "a19585e9-0002-39d0-015f-b3e2b9a0c854" : {
 		value : accelData,
 		maxLen : 20,
 		readable : true,
 		notify : true
-	    },
-	    "a19585e9-0004-39d0-015f-b3e2b9a0c854" : {
+    },
+    "a19585e9-0004-39d0-015f-b3e2b9a0c854" : {
 		value : batteryLevel,
 		maxLen : 20,
 		readable : true,
 		notify : true
-	    }
+    }
 	}
     });
 
