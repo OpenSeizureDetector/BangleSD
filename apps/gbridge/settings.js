@@ -12,7 +12,7 @@
   function updateSetting(setting, value) {
     let settings = require('Storage').readJSON("gbridge.json", true) || {};
     settings[setting] = value
-    require('Storage').write('gbridge.json', settings);
+    require('Storage').writeJSON('gbridge.json', settings);
   }
   function setIcon(visible) {
     updateSetting('showIcon', visible);
@@ -23,20 +23,23 @@
   }
   var mainmenu = {
     "" : { "title" : "Gadgetbridge" },
-    "Connected" : { value : NRF.getSecurityStatus().connected?"Yes":"No" },
-    "Show Icon" : {
+    "< Back" : back,
+    /*LANG*/"Connected" : { value : NRF.getSecurityStatus().connected?/*LANG*/"Yes":/*LANG*/"No" },
+    /*LANG*/"Show Icon" : {
       value: settings().showIcon,
-      format: v => v?"Yes":"No",
       onchange: setIcon
     },
-    "Find Phone" : function() { E.showMenu(findPhone); },
-    "< Back" : back,
+    /*LANG*/"Find Phone" : function() { E.showMenu(findPhone); },
+    /*LANG*/"Record HRM" : {
+      value: !!settings().hrm,
+      onchange: v => updateSetting('hrm', v)
+    }
   };
 
   var findPhone = {
     "" : { "title" : "-- Find Phone --" },
-    "On" : _=>gb({t:"findPhone",n:true}),
-    "Off" : _=>gb({t:"findPhone",n:false}),
+    /*LANG*/"On" : _=>gb({t:"findPhone",n:true}),
+    /*LANG*/"Off" : _=>gb({t:"findPhone",n:false}),
     "< Back" : function() { E.showMenu(mainmenu); },
   };
 

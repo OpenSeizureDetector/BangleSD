@@ -1,0 +1,5 @@
+{
+  "recording":false,
+  "period":10,
+  "record" : ["gps"]
+}

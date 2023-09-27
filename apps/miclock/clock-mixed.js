@@ -77,11 +77,13 @@ Bangle.on('lcdPower', function(on) {
     drawMixedClock();
 });
 
+// Show launcher when button pressed
+Bangle.setUI("clock");
+
 g.clear();
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 setInterval(drawMixedClock, 5E3);
 drawMixedClock();
 
-// Show launcher when middle button pressed
-setWatch(Bangle.showLauncher, BTN2, {repeat:false,edge:"falling"});
+

@@ -1,30 +1,10 @@
-(function(){
-  var CHARGING = 0x07E0;
-
-  function setWidth() {
-    WIDGETS["bat"].width = 40 + (Bangle.isCharging()?16:0);
-  }
-  function draw() {
-    var s = 39;
-    var x = this.x, y = this.y;
-    if (Bangle.isCharging()) {
-      g.setColor(CHARGING).drawImage(atob("DhgBHOBzgc4HOP////////////////////3/4HgB4AeAHgB4AeAHgB4AeAHg"),x,y);
-      x+=16;
-    }
-    g.setColor(-1);
-    g.fillRect(x,y+2,x+s-4,y+21);
-    g.clearRect(x+2,y+4,x+s-6,y+19);
-    g.fillRect(x+s-3,y+10,x+s,y+14);
-    g.setColor(CHARGING).fillRect(x+4,y+6,x+4+E.getBattery()*(s-12)/100,y+17);
-    g.setColor(-1);
-  }
+{
   Bangle.on('charging',function(charging) {
     if(charging) Bangle.buzz();
-    setWidth();
-    Bangle.drawWidgets(); // relayout widgets
+    WIDGETS["bat"].draw();
     g.flip();
   });
-  var batteryInterval;
+  let batteryInterval = Bangle.isLCDOn() ? setInterval(()=>WIDGETS["bat"].draw(), 60000) : undefined;
   Bangle.on('lcdPower', function(on) {
     if (on) {
       WIDGETS["bat"].draw();
@@ -38,6 +18,15 @@
       }
     }
   });
-  WIDGETS["bat"]={area:"tr",width:40,draw:draw};
-  setWidth();
-})()
+  WIDGETS["bat"]={area:"tr",width:40,draw:function() {
+    var x = this.x, y = this.y;
+    g.reset().setColor(g.theme.fg).fillRect(x,y+2,x+35,y+21).clearRect(x+2,y+4,x+33,y+19).fillRect(x+36,y+10,x+39,y+14);
+    var battery = E.getBattery();
+    if(battery < 20) g.setColor("#f00");
+    else if (battery < 40) g.setColor(g.theme.dark ? "#ff0" : "#f80");
+    else g.setColor("#0f0");
+    g.fillRect(x+4,y+6,x+4+battery*27/100,y+17);
+    if (Bangle.isCharging()) 
+      g.reset().drawImage(atob("FAqBAAHAAA8AAPwAB/D4f8P+Hw/gAD8AAPAAA4A="),x+8,y+7);
+  }};
+}

@@ -1,0 +1,31 @@
+0.01: New App!
+0.02: Modified data format to include daily summaries
+0.03: Settings to turn HRM on
+0.04: Add HRM graph view
+      Don't restart HRM when changing apps if we've already got a good BPM value
+0.05: Fix daily summary calculation
+0.06: Fix daily health summary for movement (a line got deleted!)
+0.07: Added coloured bar charts
+0.08: Suppress bleed through of E.showMenu's when displaying bar charts
+0.09: Fix file naming so months are 1-based (not 0) (fix #1119)
+0.10: Adds additional 3 minute setting for HRM
+0.11: Pre-minified boot&lib - folds constants and saves RAM
+0.12: Add setting for Daily Step Goal
+0.13: Add support for internationalization
+0.14: Move settings
+0.15: Fix charts (fix #1366)
+0.16: Code tidyup, add back button in top left of health app graphs
+0.17: Add automatic translation of bar chart labels
+0.18: Show step goal in daily step chart
+0.19: Can show notification when daily step goal is reached
+0.20: Fix the settings page, it would not update settings correctly.
+0.21: Update boot.min.js.
+0.22: Fix timeout for heartrate sensor on 3 minute setting (#2435)
+0.23: Fix HRM logic
+0.24: Correct daily health summary for movement (some logic errors resulted in garbage data being written)
+0.25: lib.read* methods now return correctly scaled movement
+      movement graph in app is now an average, not sum
+      fix 11pm slot for daily HRM
+0.26: Implement API for activity fetching
+0.27: Fix typo in daily summary graph code causing graph not to load
+      Fix daily summaries for 31st of the month

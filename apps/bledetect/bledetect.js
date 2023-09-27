@@ -5,6 +5,7 @@ let menu = {
 
 function showMainMenu() {
   menu["< Back"] =  () => load();
+  Bangle.drawWidgets();
   return E.showMenu(menu);
 }
 
@@ -18,7 +19,7 @@ function showDeviceInfo(device){
       value: device.rssi
     },
     "manufacturer": {
-      value: device.manufacturer
+      value: device.manufacturer===undefined ? "-" : device.manufacturer
     }
   };
 
@@ -55,5 +56,6 @@ function waitMessage() {
   E.showMessage("scanning");
 }
 
+Bangle.loadWidgets();
 scan();
 waitMessage();

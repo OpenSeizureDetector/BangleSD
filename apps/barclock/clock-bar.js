@@ -1,171 +1,128 @@
 /* jshint esversion: 6 */
-/**
- * A simple digital clock showing seconds as a bar
- **/
 {
-  // Check settings for what type our clock should be
-  const is12Hour = (require('Storage').readJSON('setting.json', 1) || {})['12hour']
-  let locale = require('locale')
+  /**
+   * A simple digital clock showing seconds as a bar
+   **/
+// Check settings for what type our clock should be
+  let locale = require("locale");
   { // add some more info to locale
-    let date = new Date()
-    date.setFullYear(1111)
-    date.setMonth(1, 3) // februari: months are zero-indexed
-    const localized = locale.date(date, true)
-    locale.dayFirst = /3.*2/.test(localized)
-    
-    locale.hasMeridian = false
-    if(typeof locale.meridian === 'function') {  // function does not exists if languages  app is not installed
-      locale.hasMeridian = (locale.meridian(date) !== '')
+    let date = new Date();
+    date.setFullYear(1111);
+    date.setMonth(1, 3); // februari: months are zero-indexed
+    const localized = locale.date(date, true);
+    locale.dayFirst = /3.*2/.test(localized);
+    locale.hasMeridian = (locale.meridian(date)!=="");
+  }
+
+  let barW = 0, prevX = 0;
+  const renderBar = function (l) {
+    "ram";
+    if (l) prevX = 0; // called from Layout: drawing area was cleared
+    else l = clock.layout.bar;
+    let x2 = l.x+barW;
+    if (clock.powerSave && Bangle.isLocked()) x2 = 0; // hide bar
+    if (x2===prevX) return; // nothing to do
+    if (x2===0) x2--; // don't leave 1px line
+    if (x2<Math.max(0, prevX)) g.setBgColor(l.bgCol || g.theme.bg).clearRect(x2+1, l.y, prevX, l.y2);
+    else g.setColor(l.col || g.theme.fg).fillRect(prevX+1, l.y, x2, l.y2);
+    prevX = x2;
+  }
+
+  const timeText = function(date) {
+    if (!clock.is12Hour) {
+      return locale.time(date, true);
     }
-    
-  }
-  const screen = {
-    width: g.getWidth(),
-    height: g.getWidth(),
-    middle: g.getWidth() / 2,
-    center: g.getHeight() / 2,
-  }
-
-  // hardcoded "settings"
-  const settings = {
-    time: {
-      color: -1,
-      font: '6x8',
-      size: (is12Hour && locale.hasMeridian) ? 6 : 8,
-      middle: screen.middle,
-      center: screen.center,
-      ampm: {
-        color: -1,
-        font: '6x8',
-        size: 2,
-      },
-    },
-    date: {
-      color: -1,
-      font: 'Vector',
-      size: 20,
-      middle: screen.height - 20, // at bottom of screen
-      center: screen.center,
-    },
-    bar: {
-      color: -1,
-      top: 155, // just below time
-      thickness: 6, // matches 24h time "pixel" size
-    },
-  }
-
-  const SECONDS_PER_MINUTE = 60
-
-  const timeText = function (date) {
-    if (!is12Hour) {
-      return locale.time(date, true)
+    const date12 = new Date(date.getTime());
+    const hours = date12.getHours();
+    if (hours===0) {
+      date12.setHours(12);
+    } else if (hours>12) {
+      date12.setHours(hours-12);
     }
-    const date12 = new Date(date.getTime())
-    const hours = date12.getHours()
-    if (hours === 0) {
-      date12.setHours(12)
-    } else if (hours > 12) {
-      date12.setHours(hours - 12)
-    }
-    return locale.time(date12, true)
+    return locale.time(date12, true);
   }
-  const ampmText = function (date) {
-    return is12Hour ? locale.meridian(date) : ''
-  }
-
-  const dateText = function (date) {
+  const ampmText = date => (clock.is12Hour && locale.hasMeridian) ? locale.meridian(date) : "";
+  const dateText = date => {
     const dayName = locale.dow(date, true),
       month = locale.month(date, true),
-      day = date.getDate()
-    const dayMonth = locale.dayFirst ? `${day} ${month}` : `${month} ${day}`
-    return `${dayName}  ${dayMonth}`
-  }
+      day = date.getDate();
+    const dayMonth = locale.dayFirst ? `${day} ${month}` : `${month} ${day}`;
+    return `${dayName}  ${dayMonth}`;
+  };
 
-  const drawDateTime = function (date) {
-    const t = settings.time
-    g.setColor(t.color)
-    g.setFont(t.font, t.size)
-    g.setFontAlign(0, 0) // centered
-    g.drawString(timeText(date), t.center, t.middle, true)
-    if (is12Hour && locale.hasMeridian) {
-      const a = settings.time.ampm
-      g.setColor(a.color)
-      g.setFont(a.font, a.size)
-      g.setFontAlign(1, -1) // right top
-      // at right edge of screen, aligned with time bottom
-      const left = screen.width - a.size * 2,
-        top = t.middle + t.size - a.size
-      g.drawString(ampmText(date), left, top, true)
+  const ClockFace = require("ClockFace"),
+    clock = new ClockFace({
+      precision: 1,
+      settingsFile: "barclock.settings.json",
+      init: function() {
+        const Layout = require("Layout");
+        this.layout = new Layout({
+          type: "v", c: [
+            {
+              type: "h", c: [
+                {id: "time", label: "88:88", type: "txt", font: "6x8:5", col: g.theme.fg, bgCol: g.theme.bg}, // updated below
+                {id: "ampm", label: "  ", type: "txt", font: "6x8:2", col: g.theme.fg, bgCol: g.theme.bg},
+              ],
+            },
+            {id: "bar", type: "custom", fillx: 1, height: 6, col: g.theme.fg2, render: renderBar},
+            this.showDate ? {height: 40} : {},
+            this.showDate ? {id: "date", type: "txt", font: "10%", valign: 1} : {},
+          ],
+        }, {lazy: true});
+        // adjustments based on screen size and whether we display am/pm
+        let thickness; // bar thickness, same as time font "pixel block" size
+        if (this.is12Hour && locale.hasMeridian) {
+          // Maximum font size = (<screen width> - <ampm: 2chars * (2*6)px>) / (5chars * 6px)
+          thickness = Math.floor((Bangle.appRect.w-24)/(5*6));
+        } else {
+          this.layout.ampm.label = "";
+          thickness = Math.floor(Bangle.appRect.w/(5*6));
+        }
+        let bar = this.layout.bar;
+        bar.height = thickness+1;
+        if (this.font===1) { // vector
+          const B2 = process.env.HWVERSION>1;
+          if (this.is12Hour && locale.hasMeridian) {
+            this.layout.time.font = "Vector:"+(B2 ? 50 : 60);
+            this.layout.ampm.font = "Vector:"+(B2 ? 20 : 40);
+          } else {
+            this.layout.time.font = "Vector:"+(B2 ? 60 : 80);
+          }
+        } else {
+          this.layout.time.font = "6x8:"+thickness;
+        }
+        this.layout.update();
+        bar.y2 = bar.y+bar.height-1;
+      },
+      update: function(date, c) {
+        "ram";
+        if (c.m) this.layout.time.label = timeText(date);
+        if (c.h) this.layout.ampm.label = ampmText(date);
+        if (c.d && this.showDate) this.layout.date.label = dateText(date);
+        if (c.m) this.layout.render();
+        if (c.s) {
+          barW = Math.round(date.getSeconds()/60*this.layout.bar.w);
+          renderBar();
+        }
+      },
+      resume: function() {
+        prevX = 0; // force redraw of bar
+        this.layout.forgetLazyState();
+      },
+      remove: function() {
+        if (this.onLock) Bangle.removeListener("lock", this.onLock);
+      },
+    });
+
+  // power saving: only update once a minute while locked, hide bar
+  if (clock.powerSave) {
+    clock.onLock = lock => {
+      clock.precision = lock ? 60 : 1;
+      clock.tick();
+      renderBar(); // hide/redraw bar right away
     }
-
-    const d = settings.date
-    g.setColor(d.color)
-    g.setFont(d.font, d.size)
-    g.setFontAlign(0, 0) // centered
-    g.drawString(dateText(date), d.center, d.middle, true)
+    Bangle.on("lock", clock.onLock);
   }
 
-  const drawBar = function (date) {
-    const b = settings.bar
-    const seconds = date.getSeconds()
-    if (seconds === 0) {
-      // zero-size rect stills draws one line of pixels, we don't want that
-      return
-    }
-    const fraction = seconds / SECONDS_PER_MINUTE,
-      width = fraction * screen.width
-    g.setColor(b.color)
-    g.fillRect(0, b.top, width, b.top + b.thickness)
-  }
-
-  const clearScreen = function () {
-    g.setColor(0)
-    const timeTop = settings.time.middle - (settings.time.size * 4)
-    g.fillRect(0, timeTop, screen.width, screen.height)
-  }
-
-  let lastSeconds
-  const tick = function () {
-    g.reset()
-    const date = new Date()
-    const seconds = date.getSeconds()
-    if (lastSeconds > seconds) {
-      // new minute
-      clearScreen()
-      drawDateTime(date)
-    }
-    // the bar only gets larger, so drawing on top of the previous one is fine
-    drawBar(date)
-
-    lastSeconds = seconds
-  }
-
-  let iTick
-  const start = function () {
-    lastSeconds = 99 // force redraw
-    tick()
-    iTick = setInterval(tick, 1000)
-  }
-  const stop = function () {
-    if (iTick) {
-      clearInterval(iTick)
-      iTick = undefined
-    }
-  }
-
-  // clean app screen
-  g.clear()
-  Bangle.loadWidgets()
-  Bangle.drawWidgets()
-  // Show launcher when middle button pressed
-  setWatch(Bangle.showLauncher, BTN2, {repeat: false, edge: 'falling'})
-
-  Bangle.on('lcdPower', function (on) {
-    if (on) {
-      start()
-    } else {
-      stop()
-    }
-  })
-  start()
+  clock.start();
 }

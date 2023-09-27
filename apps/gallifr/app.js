@@ -238,10 +238,12 @@ Bangle.on('lcdPower', (on) => {
   }
 });
 
+// Show launcher when button pressed
+Bangle.setUI("clock");
+
 g.clear();
 startTimers();
 Bangle.loadWidgets();
 drawAll();
 
-// Show launcher when middle button pressed
-setWatch(Bangle.showLauncher, BTN2, { repeat: false, edge: "falling" });
+

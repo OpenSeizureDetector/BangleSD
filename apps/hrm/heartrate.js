@@ -1,74 +1,127 @@
-Bangle.setLCDPower(1);
-Bangle.setLCDTimeout(0);
-Bangle.ioWr(0x80,0)
-x=0;
-var min=0,max=0;
+if (process.env.HWVERSION == 1) {
+  Bangle.setLCDPower(1);
+  Bangle.setLCDTimeout(0);
+}
+
+Bangle.setHRMPower(1);
+var hrmInfo = {}, hrmOffset = 0;
+var hrmInterval;
+var btm = g.getHeight()-1;
+var lastHrmPt = []; // last xy coords we draw a line to
+
+function onHRM(h) {
+  if (counter!==undefined) {
+    // the first time we're called remove
+    // the countdown
+    counter = undefined;
+    g.clearRect(0,24,g.getWidth(),g.getHeight());
+  }
+  hrmInfo = h;
+  /* On 2v09 and earlier firmwares the only solution for realtime
+  HRM was to look at the 'raw' array that got reported. If you timed
+  it right you could grab the data pretty much as soon as it was written.
+  In new firmwares, '.raw' is not available. */
+  if (hrmInterval) clearInterval(hrmInterval);
+  hrmInterval = undefined;
+  if (hrmInfo.raw) {
+    hrmOffset = 0;
+    setTimeout(function() {
+      hrmInterval = setInterval(readHRM,41);
+    }, 40);
+  }
+  updateHrm();
+}
+Bangle.on('HRM', onHRM);
+
+function updateHrm(){
+  var px = g.getWidth()/2;
+  g.setFontAlign(0,-1);
+  g.clearRect(0,24,g.getWidth(),80);
+  g.setFont("6x8").drawString(/*LANG*/"Confidence "+(hrmInfo.confidence || "--")+"%", px, 70);
+
+  updateScale();
+
+  g.setFontAlign(0,0);
+  var str = hrmInfo.bpm || "--";
+  g.setFontVector(40).setColor(hrmInfo.confidence > 50 ? g.theme.fg : "#888").drawString(str,px,45);
+  px += g.stringWidth(str)/2;
+  g.setFont("6x8").setColor(g.theme.fg);
+  g.drawString(/*LANG*/"BPM",px+15,45);
+}
+
+function updateScale(){
+    g.setFontAlign(-1,-1);
+    g.clearRect(2,70,40,78);
+    g.setFont("6x8").drawString(scale, 2, 70);
+}
+
+var rawMax = 0;
+var scale = 2000;
+var MID = (g.getHeight()+80)/2;
+/* On newer (2v10) firmwares we can subscribe to get
+HRM events as they happen */
+Bangle.on('HRM-raw', function(v) {
+  h=v;
+  hrmOffset++;
+  if (hrmOffset>g.getWidth()) {
+    let thousands = Math.round(rawMax / 1000) * 1000;
+    if (thousands > scale) scale = thousands;
+
+    g.clearRect(0,80,g.getWidth(),g.getHeight());
+    updateScale();
+
+    hrmOffset=0;
+    lastHrmPt = [-100,0];
+  }
+  if (rawMax < v.raw) {
+    rawMax = v.raw;
+  }
+  y = E.clip(btm-(8+v.filt/3000),btm-24,btm);
+  g.setColor(1,0,0).fillRect(hrmOffset,btm, hrmOffset, y);
+  y = E.clip(btm - (v.raw/scale*84),84,btm);
+  g.setColor(g.theme.fg).drawLine(lastHrmPt[0],lastHrmPt[1],hrmOffset, y);
+  lastHrmPt = [hrmOffset, y];
+  if (counter !==undefined) {
+    counter = undefined;
+    g.clearRect(0,24,g.getWidth(),g.getHeight());
+    updateHrm();
+  }
+});
+
+// It takes 5 secs for us to get the first HRM event
+var counter = 5;
+function countDown() {
+  if (counter) {
+    g.drawString(counter--,g.getWidth()/2,g.getHeight()/2, true);
+    setTimeout(countDown, 1000);
+  }
+}
+g.clear();
+Bangle.loadWidgets();
+Bangle.drawWidgets();
+g.setColor(g.theme.fg);
+g.reset().setFont("6x8",2).setFontAlign(0,-1);
+g.drawString(/*LANG*/"Please wait...",g.getWidth()/2,g.getHeight()/2 - 16);
+countDown();
+
+
 var wasHigh = 0, wasLow = 0;
 var lastHigh = getTime();
 var hrmList = [];
-var hrm;
+var hrmInfo;
 
 function readHRM() {
-  var a = analogRead(D29);
-  var h = getTime();
-  min=Math.min(min*0.97+a*0.03,a);
-  max=Math.max(max*0.97+a*0.03,a);
-  y = E.clip(170 - (a*960*4),100,230);
-  if (x==0) {
-    g.clearRect(0,100,239,239);
-    g.moveTo(-100,0);
-  }
-  /*g.setColor(0,1,0);
-  var z = 170 - (min*960*4); g.fillRect(x,z,x,z);
-  var z = 170 - (max*960*4); g.fillRect(x,z,x,z);*/
-  g.setColor(1,1,1);
-  g.lineTo(x,y);
-  if ((max-min)>0.005) {
-    if (4*a > (min+3*max)) { // high
-      g.setColor(1,0,0);
-      g.fillRect(x,230,x,239);
-      g.setColor(1,1,1);
-      if (!wasHigh && wasLow) {
-        var currentHrm = 60/(h-lastHigh);
-        lastHigh = h;
-        if (currentHrm<250) {
-          while (hrmList.length>12) hrmList.shift();
-          hrmList.push(currentHrm);
-          // median filter
-          var t = hrmList.slice(); // copy
-          t.sort();
-          // average the middle 3
-          var mid = t.length>>1;
-          if (mid+2<t.length)
-            hrm = (t[mid]+t[mid+1]+t[mid+2])/3;
-          else if (mid<t.length)
-            hrm = t[mid];
-          else
-            hrm = 0;
-          g.setFontVector(40);
-          g.setFontAlign(0,0);
-          g.clearRect(0,0,239,100);
-          var str = hrm ? Math.round(hrm) : "?";
-          var px = 120;
-          g.drawString(str,px,40);
-          px += g.stringWidth(str)/2;
-          g.setFont("6x8");
-          g.drawString("BPM",px+20,60);
-        }
-      }
-      wasLow = 0;
-      wasHigh = 1;
-    } else if (4*a < (max+3*min)) { // low
-      wasLow = 1;
-    } else { // middle
-      g.setColor(0.5,0,0);
-      g.fillRect(x,230,x,239);
-      g.setColor(1,1,1);
-      wasHigh = 0;
-    }
-  }
-  x++;
-  if (x>239)x=0;
-}
+  if (!hrmInfo) return;
 
-setInterval(readHRM,50);
+  if (hrmOffset==0) {
+    g.clearRect(0,100,g.getWidth(),g.getHeight());
+    lastHrmPt = [-100,0];
+  }
+  for (var i=0;i<2;i++) {
+    var a = hrmInfo.raw[hrmOffset];
+    hrmOffset++;
+    y = E.clip(170 - (a*2),100,230);
+    g.setColor(g.theme.fg).drawLine(lastHrmPt[0],lastHrmPt[1],hrmOffset, y);
+    lastHrmPt = [hrmOffset, y];
+  }
+}

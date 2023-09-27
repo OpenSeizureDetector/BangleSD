@@ -1,6 +1,11 @@
-lib/espruinotools.js
-lib/imageconverter.js
-lib/qrcode.min.js
-lib/heatshrink.js
-lib/marked.min.js
 apps/animclk/V29.LBM.js
+apps/banglerun/rollup.config.js
+apps/schoolCalendar/fullcalendar/main.js
+apps/authentiwatch/qr_packed.js
+apps/qrcode/qr-scanner.umd.min.js
+apps/gipy/pkg/gps.js
+apps/health/chart.min.js
+*.test.js
+
+# typescript/generated files
+apps/btadv/*.js

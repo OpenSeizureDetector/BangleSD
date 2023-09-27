@@ -9,7 +9,7 @@
       highres: true,
       animation : true,
       frame : 3,
-      debug: true
+      debug: false
     };
   }
   
@@ -41,7 +41,6 @@
     },
     "Animation" : {
       value : settings.animation,
-      format : v => v?"On":"Off",
       onchange : saveChange('animation')
     },
     "Frame rate" : {
@@ -51,7 +50,6 @@
     },
     "Debug" : {
       value : settings.debug,
-      format : v => v?"On":"Off",
       onchange : saveChange('debug')
     },
     '< Back': back

@@ -1,10 +1,10 @@
 Bangle.js App Loader (and Apps)
 ================================
 
-[![Build Status](https://travis-ci.org/espruino/BangleApps.svg?branch=master)](https://travis-ci.org/espruino/BangleApps)
+[![Build Status](https://github.com/espruino/BangleApps/actions/workflows/nodejs.yml/badge.svg)](https://github.com/espruino/BangleApps/actions/workflows/nodejs.yml)
 
 * Try the **release version** at [banglejs.com/apps](https://banglejs.com/apps)
-* Try the **development version** at [github.io](https://espruino.github.io/BangleApps/)
+* Try the **development version** at [espruino.github.io](https://espruino.github.io/BangleApps/)
 
 **All software (including apps) in this repository is MIT Licensed - see [LICENSE](LICENSE)** By
 submitting code to this repository you confirm that you are happy with it being MIT licensed,
@@ -12,7 +12,7 @@ and that it is not licensed in another way that would make this impossible.
 
 ## How does it work?
 
-* A list of apps is in `apps.json`
+* A list of apps is in `apps.json` (this is auto-generated from all the `apps/yourapp/metadata.json` using Jekyll or `bin/create_apps_json.sh`)
 * Each element references an app in `apps/<id>` which is uploaded
 * When it starts, BangleAppLoader checks the JSON and compares
 it with the files it sees in the watch's storage.
@@ -49,28 +49,40 @@ easily distinguish between file types, we use the following:
 
 ## Adding your app to the menu
 
-* Come up with a unique (all lowercase, nu spaces) name, we'll assume `7chname`. Bangle.js
+* Come up with a unique (all lowercase, no spaces) name, we'll assume `myappid`. Bangle.js
 is limited to 28 char filenames and appends a file extension (eg `.js`) so please
 try and keep filenames short to avoid overflowing the buffer.
-* Create a folder called `apps/<id>`, lets assume `apps/7chname`
-* We'd recommend that you copy files from 'Example Applications' (below) as a base, or...
-* `apps/7chname/app.png` should be a 48px icon
-* Use http://www.espruino.com/Image+Converter to create `apps/7chname/app-icon.js`, using a 1 bit, 4 bit or 8 bit Web Palette "Image String"
-* Create an entry in `apps.json` as follows:
+* Create a folder called `apps/<id>`, lets assume `apps/myappid`
+* We'd recommend that you copy files from one of the Examples in `apps/_example_*` (see below), or...
+* `apps/myappid/app.png` should be a 48px icon
+* Use http://www.espruino.com/Image+Converter to create `apps/myappid/app-icon.js`, using a 1 bit, 4 bit or 8 bit Web Palette "Image String"
+* Create/modify `apps/myappid/metadata.json` as follows:
 
 ```
-{ "id": "7chname",
+{ "id": "myappid",
   "name": "My app's human readable name",
   "shortName" : "Short Name",
   "icon": "app.png",
   "description": "A detailed description of my great app",
   "tags": "",
   "storage": [
-    {"name":"7chname.app.js","url":"app.js"},
-    {"name":"7chname.img","url":"app-icon.js","evaluate":true}
+    {"name":"myappid.app.js","url":"app.js"},
+    {"name":"myappid.img","url":"app-icon.js","evaluate":true}
   ],
 },
 ```
+
+### Screenshots
+
+In the app `metadata.json` file you can add a list of screenshots with a line like: `"screenshots" : [ { "url":"screenshot.png" } ],`
+
+To get a screenshot you can:
+
+* Type `g.dump()` in the left-hand side of the Web IDE when connected to a Bangle.js 2 - you can then
+right-click and save the image shown in the terminal (this only works on Bangle.js 2 - Bangle.js 1 is
+unable to read data back from the LCD controller).
+* Run your code in the emulator and use the screenshot button in the bottom right of the window.
+
 
 ## Testing
 
@@ -86,7 +98,7 @@ This is the best way to test...
 
 **Note:** It's a great idea to get a local copy of the repository on your PC,
 then run `bin/sanitycheck.js` - it'll run through a bunch of common issues
-that there might be.
+that there might be. To get the project running locally, you have to initialize and update the git submodules first: `git submodule update --init`.
 
 Be aware of the delay between commits and updates on github.io - it can take a few minutes (and a 'hard refresh' of your browser) for changes to take effect.
 
@@ -95,12 +107,12 @@ Be aware of the delay between commits and updates on github.io - it can take a f
 Using the 'Storage' icon in [the Web IDE](https://www.espruino.com/ide/)
 (4 discs), upload your files into the places described in your JSON:
 
-* `app-icon.js` -> `7chname.img`
+* `app-icon.js` -> `myappid.img`
 
 Now load `app.js` up in the editor, and click the down-arrow to the bottom
 right of the `Send to Espruino` icon. Click `Storage` and then either choose
-`7chname.app.js` (if you'd uploaded your app previously), or `New File`
-and then enter `7chname.app.js` as the name.
+`myappid.app.js` (if you'd uploaded your app previously), or `New File`
+and then enter `myappid.app.js` as the name.
 
 Now, clicking the `Send to Espruino` icon will load the app directly into
 Espruino **and** will automatically run it.
@@ -115,9 +127,11 @@ and set it to `Load default application`.
 ## Example Applications
 
 To make the process easier we've come up with some example applications that you can use as a base
-when creating your own. Just come up with a unique 7 character name, copy `apps/_example_app`
-or `apps/_example_widget` to `apps/7chname`, and add `apps/_example_X/add_to_apps.json` to
-`apps.json`.
+when creating your own. Just come up with a unique name (ideally lowercase, under 20 chars), copy `apps/_example_app`
+or `apps/_example_widget` to `apps/myappid`, and edit `apps/myappid/metadata.json` accordingly.
+
+**Note:** the max filename length is 28 chars, so we suggest an app ID of under
+20 so that when `.app.js`/etc gets added to the end the filename isn't cropped.
 
 **If you're making a widget** please start the name with `wid` to make
 it easy to find!
@@ -128,10 +142,11 @@ The app example is available in [`apps/_example_app`](apps/_example_app)
 
 Apps are listed in the Bangle.js menu, accessible from a clock app via the middle button.
 
-* `add_to_apps.json` - insert into `apps.json`, describes the app to bootloader and loader
+* `metadata.json` - describes the app to bootloader and loader
 * `app.png` - app icon - 48x48px
 * `app-icon.js` - JS version of the icon (made with http://www.espruino.com/Image+Converter) for use in Bangle.js's menu
 * `app.js` - app code
+* `ChangeLog` - A file containing a list of changes to your app so users can see what's changed
 
 #### `app-icon.js`
 
@@ -141,11 +156,11 @@ Use the Espruino [image converter](https://www.espruino.com/Image+Converter) and
 
 Follow this steps to create a readable icon as image string.
 
-1. upload a png file
+1. upload a 48x48 png file - THE IMAGE SHOULD BE 48x48 OR LESS
 2. set _X_ Use Compression
 3. set _X_ Transparency (optional)
 4. set Diffusion: _flat_
-5. set Colours: _1 bit_, _4 bit_ or _8 bit Web Palette_
+5. set Colours: _1 bit_, any of the Optimised options, or _8 bit Web Palette_ are best
 6. set Output as: _Image String_
 
 Replace this line with the image converter output:
@@ -153,6 +168,8 @@ Replace this line with the image converter output:
 ```
 require("heatshrink").decompress(atob("mEwwJC/AH4A/AH4AgA=="))
 ```
+
+**Do not add a trailing semicolon**
 
 You can also use this converter for creating images you like to draw with `g.drawImage()` with your app.
 
@@ -164,17 +181,18 @@ has call to completely clear the screen. Widgets themselves will update as and w
 
 The widget example is available in [`apps/_example_widget`](apps/_example_widget)
 
-* `add_to_apps.json` - insert into `apps.json`, describes the widget to bootloader and loader
+* `metadata.json` - describes the widget to bootloader and loader
 * `widget.js` - widget code
 
 Widgets are just small bits of code that run whenever an app that supports them
 calls `Bangle.loadWidgets()`. If they want to display something in the 24px high
-widget bars at the top and bottom of the screen they can add themselves to
-the global `WIDGETS` array with:
+widget bar at the top of the screen they can add themselves to the global
+`WIDGETS` array with:
 
 ```
 WIDGETS["mywidget"]={
   area:"tl", // tl (top left), tr (top right), bl (bottom left), br (bottom right)
+  sortorder:0, // (Optional) determines order of widgets in the same corner
   width: 24, // how wide is the widget? You can change this and call Bangle.drawWidgets() to re-layout
   draw:draw // called to draw the widget
 };
@@ -184,22 +202,34 @@ When the widget is to be drawn, `x` and `y` values are set up in `WIDGETS["mywid
 and `draw` can then use `this.x` and `this.y` to figure out where it needs to draw to.
 
 
+### ChangeLog
+
+This is a file containing a list of changes to your app so users can see what's changed, for example:
+
+```
+0.01: New App!
+0.02: Changed the colors
+0.03: Made the app run quicker
+```
+
+Entries should be newest last, with the version number of the last entry matching the version in `metadata.json`
+
+Please keep the same format at the example as the file needs to be parsed by the BangleApps tools.
+
 ### `app.info` format
 
-This is the file that's **auto-generated** and loaded onto Bangle.js by the App Loader,
+This is the file that's **auto-generated** from `metadata.json` and loaded onto Bangle.js by the App Loader,
 and which gives information about the app for the Launcher.
 
 ```
 {
   "name":"Short Name", // for Bangle.js menu
-  "icon":"*7chname", // for Bangle.js menu
-  "src":"-7chname", // source file
-  "type":"widget/clock/app", // optional, default "app"
-     // if this is 'widget' then it's not displayed in the menu
-     // if it's 'clock' then it'll be loaded by default at boot time
-  "dependencies" : { "notify":"type" } // optional, app 'types' we depend on
+  "icon":"*myappid", // for Bangle.js menu
+  "src":"-myappid", // source file
+  "type":"widget/clock/app/bootloader/...", // optional, default "app"
+     // see 'type' in 'metadata.json format' below for more options/info
   "version":"1.23",
-     // added by BangleApps loader on upload based on apps.json
+     // added by BangleApps loader on upload based on metadata.json
   "files:"file1,file2,file3",
      // added by BangleApps loader on upload - lists all files
      // that belong to the app so it can be deleted
@@ -211,17 +241,52 @@ and which gives information about the app for the Launcher.
 }
 ```
 
-### `apps.json` format
+### `metadata.json` format
 
 ```
 { "id": "appid",              // 7 character app id
   "name": "Readable name",    // readable name
   "shortName": "Short name",  // short name for launcher
-  "icon": "icon.png",         // icon in apps/
+  "version": "0v01",          // the version of this app
   "description": "...",       // long description (can contain markdown)
-  "type":"...",               // optional(if app) - 'app'/'widget'/'launch'/'bootloader'
+  "icon": "icon.png",         // icon in apps/
+  "screenshots" : [ { "url":"screenshot.png" } ], // optional screenshot for app
+  "type":"...",               // optional(if app) -  
+                              //   'app' - an application
+                              //   'clock' - a clock - required for clocks to automatically start
+                              //   'widget' - a widget
+                              //   'module' - this provides a module that can be used with 'require'.
+                              //              'provides_modules' should be used if type:module is specified
+                              //   'bootloader' - an app that at startup (app.boot.js) but doesn't have a launcher entry for 'app.js'
+                              //   'settings' - apps that appear in Settings->Apps (with appname.settings.js) but that have no 'app.js'
+                              //   'clkinfo' - Provides a 'myapp.clkinfo.js' file that can be used to display info in clocks - see modules/clock_info.js
+                              //   'RAM' - code that runs and doesn't upload anything to storage
+                              //   'launch' - replacement 'Launcher'
+                              //   'textinput' - provides a 'textinput' library that allows text to be input on the Bangle
+                              //   'scheduler' - provides 'sched' library and boot code for scheduling alarms/timers
+                              //                 (currently only 'sched' app)
+                              //   'notify' - provides 'notify' library for showing notifications
+                              //   'locale' - provides 'locale' library for language-specific date/distance/etc
+                              //              (a version of 'locale' is included in the firmware)
   "tags": "",                 // comma separated tag list for searching
-
+                              // common types are:
+                              //   'clock' - it's a clock
+                              //   'widget' - it is (or provides) a widget
+                              //   'outdoors' - useful for outdoor activities
+                              //   'tool' - a useful utility (timer, calculator, etc)
+                              //   'game' - a game
+                              //   'bluetooth' - uses Bluetooth LE
+                              //   'system' - used by the system
+                              //   'clkinfo' - provides or uses clock_info module for data on your clock face or clocks that support it (see apps/clock_info/README.md)
+  "supports": ["BANGLEJS2"],  // List of device IDs supported, either BANGLEJS or BANGLEJS2
+  "dependencies" : { "notify":"type" } // optional, app 'types' we depend on (see "type" above)
+  "dependencies" : { "messages":"app" } // optional, depend on a specific app ID
+                              // for instance this will use notify/notifyfs is they exist, or will pull in 'notify'
+  "dependencies" : { "messageicons":"module" } // optional, depend on a specific library to be used with 'require' - see provides_modules
+  "dependencies" : { "message":"widget" } // optional, depend on a specific type of widget - see provides_widgets
+  "provides_modules" : ["messageicons"] // optional, this app provides a module that can be used with 'require'
+  "provides_widgets" : ["battery"] // optional, this app provides a type of widget - 'alarm/battery/bluetooth/pedometer/message'
+  "default" : true,           // set if an app is the default implementer of something (a widget/module/etc)
   "readme": "README.md",      // if supplied, a link to a markdown-style text file
                               // that contains more information about this app (usage, etc)
                               // A 'Read more...' link will be added under the app
@@ -230,6 +295,11 @@ and which gives information about the app for the Launcher.
                               // iframe, and it must post back an 'app' structure
                               // like this one with 'storage','name' and 'id' set up
                               // see below for more info
+
+  "customConnect": true,      // if supplied, ensure we are connected to a device
+                              // before the "custom.html" iframe is loaded. An
+                              // onInit function in "custom.html" is then called
+                              // with info on the currently connected device.                 
 
   "interface": "interface.html",   // if supplied, apps/interface.html is loaded in an
                               // iframe, and it may interact with the connected Bangle
@@ -240,16 +310,26 @@ and which gives information about the app for the Launcher.
                               // add an icon to allow your app to be tested
 
   "storage": [                // list of files to add to storage
-    {"name":"appid.js",         // filename to use in storage
+    {"name":"appid.js",       // filename to use in storage.
+                              // If name=='RAM', the code is sent directly to Bangle.js and is not saved to a file
      "url":"",                // URL of file to load (currently relative to apps/)
-     "content":"..."          // if supplied, this content is loaded directly
-     "evaluate":true          // if supplied, data isn't quoted into a String before upload
+     "content":"...",         // if supplied, this content is loaded directly
+     "evaluate":true,         // if supplied, data isn't quoted into a String before upload
                               // (eg it's evaluated as JS)
+     "noOverwrite":true       // if supplied, this file will not be overwritten if it
+                              // already exists
+     "supports": ["BANGLEJS2"]// if supplied, this file will ONLY be uploaded to the device
+                              // types named in the array. This allows different versions of
+                              // the app to be uploaded for different platforms
     },
   ]
   "data": [                   // list of files the app writes to
     {"name":"appid.data.json",  // filename used in storage
      "storageFile":true       // if supplied, file is treated as storageFile
+     "url":"",                // if supplied URL of file to load (currently relative to apps/)
+     "content":"...",         // if supplied, this content is loaded directly     
+     "evaluate":true,         // if supplied, data isn't quoted into a String before upload
+                              // (eg it's evaluated as JS)     
     },
     {"wildcard":"appid.data.*" // wildcard of filenames used in storage
     },                         // this is mutually exclusive with using "name"
@@ -261,13 +341,13 @@ and which gives information about the app for the Launcher.
 ```
 
 * name, icon and description present the app in the app loader.
-* tags is used for grouping apps in the library, separate multiple entries by comma. Known tags are `tool`, `system`, `clock`, `game`, `sound`, `gps`, `widget`, `launcher` or empty.
+* tags is used for grouping apps in the library, separate multiple entries by comma. Known tags are `tool`, `system`, `clock`, `game`, `sound`, `gps`, `widget`, `launcher`, `bluetooth` or empty.
 * storage is used to identify the app files and how to handle them
 * data is used to clean up files when the app is uninstalled
 
-### `apps.json`: `custom` element
+### `metadata.json`: `custom` element
 
-Apps that can be customised need to define a `custom` element in `apps.json`,
+Apps that can be customised need to define a `custom` element in `metadata.json`,
 which names an HTML file in that app's folder.
 
 When `custom` is defined, the 'upload' button is replaced by a customize
@@ -275,7 +355,7 @@ button, and when clicked it opens the HTML page specified in an iframe.
 
 In that HTML file you're then responsible for handling a button
 press and calling `sendCustomizedApp` with your own customised
-version of what's in `apps.json`:
+version of what's in `metadata.json`:
 
 ```
 <html>
@@ -288,10 +368,10 @@ version of what's in `apps.json`:
     <script>
       document.getElementById("upload").addEventListener("click", function() {
         sendCustomizedApp({
-          id : "7chname",
+          id : "myappid",
           storage:[
-            {name:"7chname.app.js", content:app_source_code},
-            {name:"7chname.img", content:'require("heatshrink").decompress(atob("mEwg...4"))', evaluate:true},
+            {name:"myappid.app.js", url:"app.js", content:app_source_code},
+            {name:"myappid.img", content:'require("heatshrink").decompress(atob("mEwg...4"))', evaluate:true},
           ]
         });
       });
@@ -303,9 +383,13 @@ version of what's in `apps.json`:
 This'll then be loaded in to the watch. See [apps/qrcode/grcode.html](the QR Code app)
 for a clean example.
 
-### `apps.json`: `interface` element
+**Note:** we specify a `url` for JS files even though it doesn't have to exist
+and will never be loaded. This is so the app loader can tell if it's a JavaScript
+file based on the extension, and if so it can minify and pretokenise it.
 
-Apps that create data that can be read back can define a `interface` element in `apps.json`,
+### `metadata.json`: `interface` element
+
+Apps that create data that can be read back can define a `interface` element in `metadata.json`,
 which names an HTML file in that app's folder.
 
 When `interface` is defined, a `Download from App` button is added to
@@ -345,43 +429,59 @@ that handles configuring the app.
 When the app settings are opened, this function is called with one
 argument, `back`: a callback to return to the settings menu.
 
-Usually it will save any information in `app.json` where `app` is the name
+Usually it will save any information in `myappid.json` where `myappid` is the name
 of your app - so you should change the example accordingly.
 
 Example `settings.js`
 ```js
 // make sure to enclose the function in parentheses
 (function(back) {
-  let settings = require('Storage').readJSON('app.json',1)||{};
+  let settings = require('Storage').readJSON('myappid.json',1)||{};
+  if (typeof settings.monkeys !== "number") settings.monkeys = 12; // default value
   function save(key, value) {
     settings[key] = value;
-    require('Storage').write('app.json',settings);
+    require('Storage').write('myappid.json', settings);
   }
   const appMenu = {
     '': {'title': 'App Settings'},
     '< Back': back,
     'Monkeys': {
-      value: settings.monkeys||12,
+      value: settings.monkeys,
       onchange: (m) => {save('monkeys', m)}
     }   
   };
   E.showMenu(appMenu)
 })
 ```
-In this example the app needs to add `app.settings.js` to `storage` in `apps.json`.   
-It should also add `app.json` to `data`, to make sure it is cleaned up when the app is uninstalled.
+In this example the app needs to add `myappid.settings.js` to `storage` in `metadata.json`.   
+It should also add `myappid.json` to `data`, to make sure it is cleaned up when the app is uninstalled.
 ```json
-  { "id": "app",
+  { "id": "myappid",
     ...
     "storage": [
       ...
-      {"name":"app.settings.js","url":"settings.js"},
+      {"name":"myappid.settings.js","url":"settings.js"}
     ],
     "data": [
-      {"name":"app.json"}
+      {"name":"myappid.json"}
     ]
   },
 ```
+
+## Modules
+
+You can include any of [Espruino's modules](https://www.espruino.com/Modules) as
+normal with `require("modulename")`. To include [Bangle's modules](modules) for use in the Web
+IDE, [upload the modules to internal storage](modules#upload-the-module-to-the-bangles-internal-storage)
+or [change the IDE's search path](modules#change-the-web-ide-search-path-to-include-banglejs-modules).
+If you want to develop your own module for your
+app(s) then you can do that too. Just add the module into the `modules` folder
+then you can use it from your app as normal.
+
+You won't be able to develop apps using your own modules with the IDE,
+so instead we'd recommend you write your module to a Storage File called
+`modulename` on Bangle.js. You can then develop your app as normal on Bangle.js
+from the IDE.
 
 ## Coding hints
 
@@ -401,7 +501,7 @@ It should also add `app.json` to `data`, to make sure it is cleaned up when the 
 
 ### Misc Notes
 
-- Need to save state? Use the `E.on('kill',...)` event to save JSON to a file called `7chname.json`, then load it at startup.
+- Need to save state? Use the `E.on('kill',...)` event to save JSON to a file called `myappid.json`, then load it at startup.
 
 - 'Alarm' apps define a file called `alarm.js` which handles the actual alarm window.
 
@@ -467,7 +567,6 @@ The [`testing`](testing) folder contains snippets of code that might be useful f
 
 * `testing/colors.js` - 16 bit colors as name value pairs
 * `testing/gpstrack.js` - code to store a GPS track in Bangle.js storage and output it back to the console
-* `testing/map` - code for splitting an image into map tiles and then displaying them
 
 ## Credits
 

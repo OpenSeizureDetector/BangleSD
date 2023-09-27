@@ -87,7 +87,6 @@ if (g.drawImages) {
   draw();
   var secondInterval = setInterval(draw,100);
   // load widgets
-  Bangle.loadWidgets();
   Bangle.drawWidgets();
   // Stop when LCD goes off
   Bangle.on('lcdPower',on=>{
@@ -102,5 +101,7 @@ if (g.drawImages) {
 } else {
   E.showMessage("Please update\nBangle.js firmware\nto use this clock","animclk");
 }
-// Show launcher when middle button pressed
-setWatch(Bangle.showLauncher, BTN2, { repeat: false, edge: "falling" });
+// Show launcher when button pressed
+Bangle.setUI("clock");
+
+Bangle.loadWidgets();
