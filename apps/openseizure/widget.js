@@ -27,35 +27,46 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 	if (accelIdx>=accelData.length) {
 		accelIdx = 0;
 		batteryLevel = E.getBattery();
-		try { NRF.updateServices({
-		[SERV_OSD] : {
-			[CHAR_OSD_ACC_DATA] : {
-			value : accelData, notify : true
-			},
-			[CHAR_OSD_BAT_DATA] : {
-			value : batteryLevel, notify : true
-			}
-		}
-		});} catch(e) {}
+		try { 
+			var charOsdAccData = {
+				value : accelData,
+				notify : true
+				};
+			var charOsdBatData = {
+				value : batteryLevel,
+				notify : true
+			};
+			var servOsd = {};
+			servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
+			servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+			var servicesCfg = {};
+			servicesCfg[SERV_OSD] = servOsd;
+		
+			NRF.updateServices(servicesCfg);
+		} catch(e) {}
 	}
 	});
 
-	NRF.setServices({
-	[SERV_OSD] : {
-		[CHAR_OSD_ACC_DATA] : {
+
+	var charOsdAccData = {
 		value : accelData,
 		maxLen : 20,
 		readable : true,
 		notify : true
-		},
-		[CHAR_OSD_BATT_DATA]: {
+		};
+	var charOsdBatData = {
 		value : batteryLevel,
 		maxLen : 20,
 		readable : true,
 		notify : true
-		}
-	}
-	});
+	};
+	var servOsd = {};
+	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
+	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+	var servicesCfg = {};
+	servicesCfg[SERV_OSD] = servOsd;
+
+	NRF.setServices(servicesCfg);
 	
 	// add your widget
 	WIDGETS["openseizure"]={

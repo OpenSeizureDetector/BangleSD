@@ -1,3 +1,4 @@
 0.01: New Widget!
 0.02: Added battery level characteristic
 0.03: Corrected service and characteristic UUIDs to match V4.2.x of OSD app.
+0.04: Fixing issue with OSD JSON specification
