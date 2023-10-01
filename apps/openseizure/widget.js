@@ -28,11 +28,11 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 		accelIdx = 0;
 		batteryLevel = E.getBattery();
 		try { NRF.updateServices({
-		SERV_OSD : {
-			CHAR_OSD_ACC_DATA : {
+		[SERV_OSD] : {
+			[CHAR_OSD_ACC_DATA] : {
 			value : accelData, notify : true
 			},
-			CHAR_OSD_BAT_DATA : {
+			[CHAR_OSD_BAT_DATA] : {
 			value : batteryLevel, notify : true
 			}
 		}
@@ -41,14 +41,14 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 	});
 
 	NRF.setServices({
-	SERV_OSD : {
-		CHAR_OSD_ACC_DATA : {
+	[SERV_OSD] : {
+		[CHAR_OSD_ACC_DATA] : {
 		value : accelData,
 		maxLen : 20,
 		readable : true,
 		notify : true
 		},
-		CHAR_OSD_BATT_DATA: {
+		[CHAR_OSD_BATT_DATA]: {
 		value : batteryLevel,
 		maxLen : 20,
 		readable : true,
@@ -62,3 +62,4 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 	area:"tl", width: 24, draw:draw
 	};
 })();
+
