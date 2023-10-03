@@ -4,24 +4,28 @@
  *
  * 07 August 2020 - Gordon Williams:  Initial version providing an accelerometer data service.
  * 12 August 2020 - Graham Jones:  Added a battery percentage service.
+ * 03 Oct 2023 - Graham Jones:  Added heart rate data service
  */
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085ea-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
+const CHAR_OSD_HR_DATA = "000085ec-0000-1000-8000-00805f9b34fb";
 
 (() => {
+	var accelData = new Uint8Array(20);
+	var accelIdx = 0;
+	var batteryLevel = 0;
+	var hrVal = 0;
+
 	function draw() {
+		// Draw the OSD Icon
 		g.reset();
 		g.drawImage(E.toArrayBuffer(atob("GBiEBAAAAAABEREQAAAAAAAAAAAKmZkgAAAAAAAAAAAKmZkgAAAAAAAAAAAKkzkgAAAAAAACIQAKkzkgABIgAAAZmSAKPykgApmRAAApmZoqMjkiqZmSAAKZmZmZ8zmpmZmZIAKZmZmZMzmZmZmZIAEpmZmZkzqZmZmSEAACqZmZkjOZmZogAAAAApmZkjOZmSAAAAAAApmZn/mZmSAAAAACqZmZrymZmZogAAEpmZmZkzmZmZmSEAqZmZmZkjqZmZmZoAKZmZmamvmpmZmZIAApmZIan6mhKZmSAAAZmiAKkymgAqmRAAACIAAKkimgAAIgAAAAAAAKkimgAAAAAAAAAAAKmZmgAAAAAAAAAAAKmZmgAAAAAAAAAAABEREQAAAAAA==")), this.x, this.y);
 	}
 
-	var accelData = new Uint8Array(20);
-	var accelIdx = 0;
-	var batteryLevel = 0;
-	//http://kionixfs.kionix.com/en/datasheet/KX023-1025%20Specifications%20Rev%2012.0.pdf
-	Bangle.accelWr(0x1B,0x01 | 0x40); // 25hz output, ODR/2 filter
-	Bangle.setPollInterval(40); // 25hz input
+
+	// accelerometer data callback.
 	Bangle.on('accel',function(a) {
 	accelData[accelIdx++] = E.clip(a.mag*64,0,255);
 	if (accelIdx>=accelData.length) {
@@ -36,9 +40,15 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 				value : batteryLevel,
 				notify : true
 			};
+			var charOsdHrData = {
+				value : hrVal,
+				notify : true
+			};
+		
 			var servOsd = {};
 			servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 			servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+			servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
 			var servicesCfg = {};
 			servicesCfg[SERV_OSD] = servOsd;
 		
@@ -46,6 +56,20 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 		} catch(e) {}
 	}
 	});
+
+
+	Bangle.on('HRM', function(hrm) { 
+		hrVal = hrm['bpm'];
+	});
+
+
+	// Initialise accelerometer
+	//http://kionixfs.kionix.com/en/datasheet/KX023-1025%20Specifications%20Rev%2012.0.pdf
+	Bangle.accelWr(0x1B,0x01 | 0x40); // 25hz output, ODR/2 filter
+	Bangle.setPollInterval(40); // 25hz input
+
+	// Switch on the heart rate monitor
+	Bangle.setHRMPower(1);
 
 
 	var charOsdAccData = {
@@ -60,9 +84,16 @@ const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 		readable : true,
 		notify : true
 	};
+	var charOsdHrData = {
+		value : hrVal,
+		maxLen : 8,
+		readable : true,
+		notify : true
+	};
 	var servOsd = {};
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+	servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
 	var servicesCfg = {};
 	servicesCfg[SERV_OSD] = servOsd;
 
