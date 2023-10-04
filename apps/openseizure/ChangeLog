@@ -4,3 +4,5 @@
 0.04: Fixing issue with OSD JSON specification
 0.05: Added heart rate characteristic
 0.06: Changed heart rate characteristic to use the official UUIDs.
+0.07: Removed OSD HR Char
+0.08: Changed OSD UUIDs
