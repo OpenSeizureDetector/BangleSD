@@ -46,20 +46,14 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 				value : batteryLevel,
 				notify : true
 			};
-			var charOsdHrData = {
-				value : hrVal,
-				notify : true
-			};
 			var charBleHrm = {
 				value : [0x06, hrVal],   // Check what 0x06 is?
 				notify : true
 			};
 		
-		
 			var servOsd = {};
 			servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 			servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
-			servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
 			var servHrm = {};
 			servHrm[CHAR_HRM] = charBleHrm;
 		
@@ -99,12 +93,6 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 		readable : true,
 		notify : true
 	};
-	var charOsdHrData = {
-		value : hrVal,
-		maxLen : 8,
-		readable : true,
-		notify : true
-	};
 	var charBleHrm = {
 		value : [0x06, 0],   // Check what 0x06 is?
 		maxLen : 2,
@@ -117,7 +105,6 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	var servOsd = {};
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
-	servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
 	var servHrm = {};
 	servHrm[CHAR_HRM] = charBleHrm;
 	servHrm[CHAR_HR_LOC] = charBleHrLoc;
