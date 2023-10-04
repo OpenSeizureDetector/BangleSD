@@ -7,10 +7,14 @@
  * 03 Oct 2023 - Graham Jones:  Added heart rate data service
  */
 
+const WATCH_FW = "0.11";
+const WATCH_ID = "BangleJs";
+
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";
 const CHAR_OSD_BAT_DATA = "000085e9-0002-1000-8000-00805f9b34fb";
 const CHAR_OSD_WATCH_ID = "000085e9-0003-1000-8000-00805f9b34fb";
+const CHAR_OSD_WATCH_FW = "000085e9-0004-1000-8000-00805f9b34fb";
 
 // Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
 // Also based on bootgathrm bangle app.
@@ -100,10 +104,14 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 		notify : true
 	};
 	var charOsdWatchId = {
-		value : "BangleJs",
-		maxLen : 20,
-		readable : true,
-		notify : true
+		value : WATCH_ID,
+		maxLen : 10,
+		readable : true
+	};
+	var charOsdWatchFw = {
+		value : WATCH_FW,
+		maxLen : 8,
+		readable : true
 	};
 	var charBleHrm = {
 		value : [0x06, 0],   // Check what 0x06 is?
@@ -118,6 +126,7 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
 	servOsd[CHAR_OSD_WATCH_ID] = charOsdWatchId;
+	servOsd[CHAR_OSD_WATCH_FW] = charOsdWatchFw;
 	var servHrm = {};
 	servHrm[CHAR_HRM] = charBleHrm;
 	servHrm[CHAR_HR_LOC] = charBleHrLoc;
