@@ -8,9 +8,8 @@
  */
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
-const CHAR_OSD_ACC_DATA = "000085ea-0000-1000-8000-00805f9b34fb";
-const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
-const CHAR_OSD_HR_DATA = "000085ec-0000-1000-8000-00805f9b34fb";
+const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";
+const CHAR_OSD_BAT_DATA = "000085e9-0002-1000-8000-00805f9b34fb";
 
 // Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
 // Also based on bootgathrm bangle app.
