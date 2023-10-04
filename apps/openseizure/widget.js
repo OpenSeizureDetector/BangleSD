@@ -10,6 +10,7 @@
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";
 const CHAR_OSD_BAT_DATA = "000085e9-0002-1000-8000-00805f9b34fb";
+const CHAR_OSD_WATCH_ID = "000085e9-0003-1000-8000-00805f9b34fb";
 
 // Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
 // Also based on bootgathrm bangle app.
@@ -92,6 +93,12 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 		readable : true,
 		notify : true
 	};
+	var charOsdWatchId = {
+		value : "BangleJs",
+		maxLen : 20,
+		readable : true,
+		notify : true
+	};
 	var charBleHrm = {
 		value : [0x06, 0],   // Check what 0x06 is?
 		maxLen : 2,
@@ -104,6 +111,7 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	var servOsd = {};
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+	servOsd[CHAR_OSD_WATCH_ID] = charOsdWatchId;
 	var servHrm = {};
 	servHrm[CHAR_HRM] = charBleHrm;
 	servHrm[CHAR_HR_LOC] = charBleHrLoc;
