@@ -3,3 +3,4 @@
 0.03: Corrected service and characteristic UUIDs to match V4.2.x of OSD app.
 0.04: Fixing issue with OSD JSON specification
 0.05: Added heart rate characteristic
+0.06: Changed heart rate characteristic to use the official UUIDs.

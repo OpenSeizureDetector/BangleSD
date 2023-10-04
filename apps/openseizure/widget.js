@@ -12,6 +12,12 @@ const CHAR_OSD_ACC_DATA = "000085ea-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_BAT_DATA = "000085eb-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_HR_DATA = "000085ec-0000-1000-8000-00805f9b34fb";
 
+// Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
+// Also based on bootgathrm bangle app.
+const SERV_HRM = 0x180D;   // Official BLE UUID
+const CHAR_HRM = 0x2A37;   // Official BLE UUID
+const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
+
 (() => {
 	var accelData = new Uint8Array(20);
 	var accelIdx = 0;
@@ -44,14 +50,23 @@ const CHAR_OSD_HR_DATA = "000085ec-0000-1000-8000-00805f9b34fb";
 				value : hrVal,
 				notify : true
 			};
+			var charBleHrm = {
+				value : [0x06, hrVal],   // Check what 0x06 is?
+				notify : true
+			};
+		
 		
 			var servOsd = {};
 			servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 			servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
 			servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
+			var servHrm = {};
+			servHrm[CHAR_HRM] = charBleHrm;
+		
 			var servicesCfg = {};
 			servicesCfg[SERV_OSD] = servOsd;
-		
+			servicesCfg[SERV_HRM] = servHrm;
+
 			NRF.updateServices(servicesCfg);
 		} catch(e) {}
 	}
@@ -90,12 +105,25 @@ const CHAR_OSD_HR_DATA = "000085ec-0000-1000-8000-00805f9b34fb";
 		readable : true,
 		notify : true
 	};
+	var charBleHrm = {
+		value : [0x06, 0],   // Check what 0x06 is?
+		maxLen : 2,
+		readable : true,
+		notify : true
+	};
+	var charBleHrLoc = { // Sensor Location: Wrist
+		value : 0x02,
+	};
 	var servOsd = {};
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
 	servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
+	var servHrm = {};
+	servHrm[CHAR_HRM] = charBleHrm;
+	servHrm[CHAR_HR_LOC] = charBleHrLoc;
 	var servicesCfg = {};
 	servicesCfg[SERV_OSD] = servOsd;
+	servicesCfg[SERV_HRM] = servHrm;
 
 	NRF.setServices(servicesCfg);
 	
