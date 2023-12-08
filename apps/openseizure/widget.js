@@ -7,6 +7,10 @@
  * 03 Oct 2023 - Graham Jones:  Added heart rate data service
  */
 
+// Uncomment for testing in ram using webIDE (https://espruino.com/ide)
+//WIDGETS = {};
+
+
 const WATCH_FW = "0.12";
 const WATCH_ID = "BangleJs";
 
@@ -37,43 +41,46 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
 	// accelerometer data callback.
 	Bangle.on('accel',function(a) {
-	accelData[accelIdx++] = E.clip(a.mag*64,0,255);
-	if (accelIdx>=accelData.length) {
-		accelIdx = 0;
-		batteryLevel = E.getBattery();
-		try { 
-			var charOsdAccData = {
-				value : accelData,
-				notify : true
+		// Calculate vector magnitude of acceleration measurement, and scale it so 1g is value 64 (so we cover 0 to 4g)
+		accelData[accelIdx++] = E.clip(a.mag*64,0,255);
+		if (accelIdx>=accelData.length) {
+			accelIdx = 0;
+			batteryLevel = E.getBattery();
+			try { 
+				var charOsdAccData = {
+					value : accelData,
+					notify : true
+					};
+				var charOsdBatData = {
+					value : batteryLevel,
+					notify : true
 				};
-			var charOsdBatData = {
-				value : batteryLevel,
-				notify : true
-			};
-			//var charOsdHrData = {
-			//	value : hrVal,
-			//	notify : true
-			//};
-			var charBleHrm = {
-				value : [0x06, hrVal],   // Check what 0x06 is?
-				notify : true
-			};
-		
-		
-			var servOsd = {};
-			servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
-			servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
-			//servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
-			var servHrm = {};
-			servHrm[CHAR_HRM] = charBleHrm;
-		
-			var servicesCfg = {};
-			servicesCfg[SERV_OSD] = servOsd;
-			servicesCfg[SERV_HRM] = servHrm;
+				//var charOsdHrData = {
+				//	value : hrVal,
+				//	notify : true
+				//};
+				var charBleHrm = {
+					value : [0x06, hrVal],   // Check what 0x06 is?
+					notify : true
+				};
+			
+			
+				var servOsd = {};
+				servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
+				servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
+				//servOsd[CHAR_OSD_HR_DATA] = charOsdHrData;
+				var servHrm = {};
+				servHrm[CHAR_HRM] = charBleHrm;
+			
+				var servicesCfg = {};
+				servicesCfg[SERV_OSD] = servOsd;
+				servicesCfg[SERV_HRM] = servHrm;
 
-			NRF.updateServices(servicesCfg);
-		} catch(e) {}
-	}
+				NRF.updateServices(servicesCfg);
+			} catch(e) {
+				E.showMessage(e,"OSD ERROR")
+			}
+		}
 	});
 
 
@@ -142,3 +149,5 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	};
 })();
 
+// Uncomment for testing in RAM using webIDE
+//Bangle.drawWidgets();
