@@ -1,2 +1,0 @@
-0.01: Initial version
-0.02: Issue newline before GB commands (solves issue with console.log and ignored commands)
