@@ -16,7 +16,7 @@ For details of how this works, please refer to the official [BangleJS repository
 
 The source code for the OpenSeizureDetector app for BangleJS is stored in the [apps/openseizure](apps/openseizure) folder.    The rest of the code is a copy of the app loader provided by the [Espruino project](https://github.com/espruino/BangleApps).
 
-For problems with the OpenSeizureDetector app itself, please contact graham@openseizuredetector.org.uk, or raise an [issue](https://github.com/OpenSeizureDetector/BangleApps/Issues) in this repository.
+For problems with the OpenSeizureDetector app itself, please contact graham@openseizuredetector.org.uk, or raise an [issue](https://github.com/OpenSeizureDetector/BangleApps/issues) in this repository.
 
 Current Status
 --------------
