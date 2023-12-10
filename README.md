@@ -39,18 +39,19 @@ Installation
   - Power on the BangleJS by pressing the button
   - If this is the first run, you will see an introductory presentation about how to use BangleJS
   - When it finishes, press the button again to start BangleJS
-  - In a web browser that supports WebBluetooth (e.g. Chrome), go to https://openseizuredetector.github.io/BangleApps/index.html
+  - In a web browser that supports WebBluetooth (e.g. Chrome), go to https://openseizuredetector.github.io/BangleSD/index.html
   - Select the BangleJS 2 option
   - Press the Connect button in the top right hand corner of the screen, then when your BangleJS watch appears in the search dialog box, select it and press 'Pair'
+    - If the BangleJS watch is not shown, it may still be connected to the phone - switching off bluetooth on the phone temporarily will make sure it is disconnected. 
   - Type 'openseizuredetector' in the search box - this should find an OpenSeizureDetector widget.
   - Select the up arrow to upload the OpenSeizureDetector widget to the watch.
   - When it completes, press the 'Disconnect' button on the web browser.
   - The watch should now display 'Hold Button to Reload' - press and hold the watch button.
   - When the watch re-starts it should show the OpenSeizureDetector logo in the top left hand corner of the screen.
 
-  The watch should now be ready to connect to the OpenSeizureDetector Android App and send data - it will do this without starting a specific watch app.
+  The watch should now be ready to connect to the OpenSeizureDetector Android App and send data - it will do this without starting a specific watch app as it runs in the background continuously.
 
-  Start the Android App (V4.2.x or higher), select "Bluetooth Device" data source, then in general settings, click the "SELECT BLE DEVICE" button to choose which watch to connect to .
+  Start the Android App (V4.2.x or higher), select "Bluetooth Device" data source, then in general settings, click the "SELECT BLE DEVICE" button to choose which watch to connect to.
 
 
   Development
