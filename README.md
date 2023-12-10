@@ -1,5 +1,5 @@
-OpenSeizureDetector BangleJS App Loader
-=======================================
+A BangleJS Watch App Data Source for OpenSeizureDetector
+========================================================
 
 [OpenSeizureDetector](https://openseizuredetector.org.uk) is a free, Open Source Epileptic Seizure Detector
 which monitors body movement and heart rate using a smart watch and generates alarms to alert a carer if a seizure is detected.
@@ -10,13 +10,13 @@ This repository contains the watch app and the web based app loader to install t
 
 If you are looking for other BangleJS apps, please look at the main Bangle JS app store at at [banglejs.com/apps](https://banglejs.com/apps).  But note though that some other BangleJS apps will interfere with the OpenSeizureDetector functionality, so I recommend you are very careful about installing other apps alongside OpenSeizureDetector.
 
-This page is rendered at [here](https://openseizuredetector.github.io/BangleApps/index.html)
+This page is rendered at [here](https://openseizuredetector.github.io/BangleSD/index.html)
 
 For details of how this works, please refer to the official [BangleJS repository](https://github.com/espruino/BangleApps)
 
 The source code for the OpenSeizureDetector app for BangleJS is stored in the [apps/openseizure](apps/openseizure) folder.    The rest of the code is a copy of the app loader provided by the [Espruino project](https://github.com/espruino/BangleApps).
 
-For problems with the OpenSeizureDetector app itself, please contact graham@openseizuredetector.org.uk, or raise an [issue](https://github.com/OpenSeizureDetector/BangleApps/issues) in this repository.
+For problems with the OpenSeizureDetector app itself, please contact graham@openseizuredetector.org.uk, or raise an [issue](https://github.com/OpenSeizureDetector/BangleSD/issues) in this repository.
 
 Current Status
 --------------
@@ -28,6 +28,8 @@ Current Status
   - The BangleJS Heart rate appears higher than I would see on a Garmin (about 100 bpm rather than 60 bpm).
   - The battery indication is a bit noisy - could do with calculating an averge to reduce noise.
   - There is no feedback about the app state on the watch, no mute function.
+  - Watch battery life is good - 100% to 75% in 10 hours, so should exceed 15 hours target easily.
+  - Please see the current [issues here](https://github.com/OpenSeizureDetector/BangleSD/issues).
 
 
 Installation
