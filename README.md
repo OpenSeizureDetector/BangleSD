@@ -4,9 +4,9 @@ OpenSeizureDetector BangleJS App Loader
 [OpenSeizureDetector](https://openseizuredetector.org.uk) is a free, Open Source Epileptic Seizure Detector
 which monitors body movement and heart rate using a smart watch and generates alarms to alert a carer if a seizure is detected.
 
-It is possible to use a [BanjgleJS 2](https://banglejs.com/) watch with an experimental, testing version OpenSeizureDetector as described in this document.
+It is possible to use a [BanjgleJS 2](https://banglejs.com/) watch as a data source for a development version OpenSeizureDetector as described in this document.
 
-This repository contains the watch app and the app loader to install the OpenSeizureDetector app for the BangleJS watch.   
+This repository contains the watch app and the web based app loader to install the OpenSeizureDetector app on the BangleJS watch.   
 
 If you are looking for other BangleJS apps, please look at the main Bangle JS app store at at [banglejs.com/apps](https://banglejs.com/apps).  But note though that some other BangleJS apps will interfere with the OpenSeizureDetector functionality, so I recommend you are very careful about installing other apps alongside OpenSeizureDetector.
 
