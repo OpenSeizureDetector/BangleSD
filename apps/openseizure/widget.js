@@ -49,15 +49,9 @@ function getTestVal() {
 // From 'sensible.js' example app
 function encodeAccel3DData(a) {
 	let x = 0; let y = 0; let z = 0;
-	if (USE_TEST_ACC_DATA === true) {
-		x = toByteArray(getTestVal(),2, true);
-		y = toByteArray(getTestVal(),2, true);
-		z = toByteArray(getTestVal(),2, true);
-	} else {
-		x = toByteArray(int(1000*a.x), 2, true);
-		y = toByteArray(int(1000*a.y), 2, true);
-		z = toByteArray(int(1000*a.z), 2, true);
-	}
+	x = toByteArray(int(1000*a.x), 2, true);
+	y = toByteArray(int(1000*a.y), 2, true);
+	z = toByteArray(int(1000*a.z), 2, true);
 	return [
 		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
 	];
