@@ -76,11 +76,11 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	let byteArray = new Array(numberOfBytes);
   
 	if(isSigned && (value < 0)) {
-	  value += 1 << (numberOfBytes * 8);
+		value += 1 << (numberOfBytes * 8);
 	}
   
 	for(let index = 0; index < numberOfBytes; index++) {
-	  byteArray[index] = (value >> (index * 8)) & 0xff;
+		byteArray[index] = (value >> (index * 8)) & 0xff;
 	}
   
 	return byteArray;
