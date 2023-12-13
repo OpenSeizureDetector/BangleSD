@@ -19,7 +19,7 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.15";
+const WATCH_FW = "0.16";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
 const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
@@ -49,7 +49,7 @@ function getTestVal() {
 // From 'sensible.js' example app
 function encodeAccel3DData(a) {
 	let x = 0; let y = 0; let z = 0;
-	if (USE_TEST_ACC_DATA) {
+	if (USE_TEST_ACC_DATA === true) {
 		x = toByteArray(getTestVal(),2, true);
 		y = toByteArray(getTestVal(),2, true);
 		z = toByteArray(getTestVal(),2, true);
