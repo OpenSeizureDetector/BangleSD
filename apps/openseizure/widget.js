@@ -19,9 +19,10 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.14a";
+const WATCH_FW = "0.14c";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
+const USE_TEST_ACC_DATA = true;  // FIXME - does not send real data
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";   // Format depends on the value of CHAR_OSD_ACC_FMT
@@ -37,12 +38,26 @@ const CHAR_HRM = 0x2A37;   // Official BLE UUID
 const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
 
+var testAccVal = 0;
+
+function getTestVal() {
+	let retVal = testAccVal;
+	testAccVal += 1;
+	return retVal;
+}
+
 // From 'sensible.js' example app
 function encodeAccel3DData(a) {
-	let x = toByteArray(a.x, 2, true);
-	let y = toByteArray(a.y, 2, true);
-	let z = toByteArray(a.z, 2, true);
-  
+	let x = 0; let y = 0; let z = 0;
+	if (USE_TEST_ACC_DATA) {
+		x = toByteArray(getTestVal(),2, true);
+		y = toByteArray(getTestVal(),2, true);
+		z = toByteArray(getTestVal(),2, true);
+	} else {
+		x = toByteArray(a.x, 2, true);
+		y = toByteArray(a.y, 2, true);
+		z = toByteArray(a.z, 2, true);
+	}
 	return [
 		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
 	];
