@@ -14,3 +14,4 @@
 0.14: Added 3d acceleration data option and test data option
 0.15: Converted 3d data to integer milli-g
 0.16: I hate Javascript - it looks like saying if (variablename) is true, even if the variable is false...
+0.17: Changed int(x) to Math.round(x).

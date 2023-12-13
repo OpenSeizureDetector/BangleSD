@@ -19,7 +19,7 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.16";
+const WATCH_FW = "0.17";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
 const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
@@ -49,16 +49,16 @@ function getTestVal() {
 // From 'sensible.js' example app
 function encodeAccel3DData(a) {
 	let x = 0; let y = 0; let z = 0;
-	x = toByteArray(int(1000*a.x), 2, true);
-	y = toByteArray(int(1000*a.y), 2, true);
-	z = toByteArray(int(1000*a.z), 2, true);
+	x = toByteArray(Math.round(1000*a.x), 2, true);
+	y = toByteArray(Math.round(1000*a.y), 2, true);
+	z = toByteArray(Math.round(1000*a.z), 2, true);
 	return [
 		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
 	];
   }
   
   function encodeAccel16bitData(a) {
-	let x = toByteArray(int(1000*a.mag), 2, false);
+	let x = toByteArray(Math.round(1000*a.mag), 2, false);
 	return [
 		x[0], x[1]
 	];
@@ -98,7 +98,8 @@ function toByteArray(value, numberOfBytes, isSigned) {
 
 	// accelerometer data callback.
 	Bangle.on('accel',function(a) {
-		let accArr = []
+		let accArr = [];
+		let n = 0;
 		switch (ACC_FMT) {
 			case ACC_FMT_8BIT:  // 8 bit vector magnitude scaled so 1g=64
 				// Calculate vector magnitude of acceleration measurement, and scale it so 1g is value 64 (so we cover 0 to 4g)
@@ -108,7 +109,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 				break;
 			case ACC_FMT_16BIT:  // 16 bit vector magnitude in milli-g
 				accArr = encodeAccel16bitData(a);
-				for (let n=0; n<accArr.length;n++) {
+				for (n=0; n<accArr.length;n++) {
 					accelData[accelIdx] = accArr[n];
 					accelIdx += 1
 				}
@@ -117,7 +118,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 				break;
 			case ACC_FMT_3D:  // 16 bit acceleration components in milli-g (x, y, z)
 				accArr = encodeAccel3DData(a);
-				for (let n=0; n<accArr.length;n++) {
+				for (n=0; n<accArr.length;n++) {
 					accelData[accelIdx] = accArr[n];
 					accelIdx += 1
 				}
