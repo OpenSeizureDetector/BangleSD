@@ -13,12 +13,14 @@
 
 const WATCH_FW = "0.12";
 const WATCH_ID = "BangleJs";
+const ACC_FMT = 0;
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";
 const CHAR_OSD_BAT_DATA = "000085e9-0002-1000-8000-00805f9b34fb";
 const CHAR_OSD_WATCH_ID = "000085e9-0003-1000-8000-00805f9b34fb";
 const CHAR_OSD_WATCH_FW = "000085e9-0004-1000-8000-00805f9b34fb";
+const CHAR_OSD_ACC_FMT  = "000085e9-0005-1000-8000-00805f9b34fb";
 
 // Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
 // Also based on bootgathrm bangle app.
@@ -83,7 +85,8 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 		}
 	});
 
-
+	// Initialise the HRM
+	Bangle.setHRMPower(1);
 	Bangle.on('HRM', function(hrm) { 
 		hrVal = hrm['bpm'];
 	});
@@ -94,10 +97,8 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	Bangle.accelWr(0x1B,0x01 | 0x40); // 25hz output, ODR/2 filter
 	Bangle.setPollInterval(40); // 25hz input
 
-	// Switch on the heart rate monitor
-	Bangle.setHRMPower(1);
 
-
+	// Define OSD Service characteristics
 	var charOsdAccData = {
 		value : accelData,
 		maxLen : 20,
@@ -120,6 +121,13 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 		maxLen : 8,
 		readable : true
 	};
+	var charOsdAccFmt = {
+		value : ACC_FMT,
+		maxLen : 1,
+		readable : true
+	};
+
+	// Define HRM Service Characteristics
 	var charBleHrm = {
 		value : [0x06, 0],   // Check what 0x06 is?
 		maxLen : 2,
@@ -129,14 +137,21 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	var charBleHrLoc = { // Sensor Location: Wrist
 		value : 0x02,
 	};
+
+	// Create the OSD Service Object from the characteristics
 	var servOsd = {};
 	servOsd[CHAR_OSD_ACC_DATA] = charOsdAccData;
 	servOsd[CHAR_OSD_BAT_DATA] = charOsdBatData;
 	servOsd[CHAR_OSD_WATCH_ID] = charOsdWatchId;
 	servOsd[CHAR_OSD_WATCH_FW] = charOsdWatchFw;
+	servOsd[CHAR_OSD_ACC_FMT] = charOsdAccFmt;
+
+	// Create the HRM Service Object from the characteristics
 	var servHrm = {};
 	servHrm[CHAR_HRM] = charBleHrm;
 	servHrm[CHAR_HR_LOC] = charBleHrLoc;
+
+	// Create the combined services definition from the OSD and HRM services.
 	var servicesCfg = {};
 	servicesCfg[SERV_OSD] = servOsd;
 	servicesCfg[SERV_HRM] = servHrm;
