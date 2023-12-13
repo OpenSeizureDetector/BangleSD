@@ -12,7 +12,13 @@
 // Uncomment for testing in ram using webIDE (https://espruino.com/ide)
 //WIDGETS = {};
 
+// Valid values of CHAR_OSD_ACC_FMT
+const ACC_FMT_8BIT = 0;
+const ACC_FMT_16BIT = 1;
+const ACC_FMT_3D = 3;
 
+/////////////////////////////////
+// Build Configuration
 const WATCH_FW = "0.14a";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
@@ -22,19 +28,50 @@ const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";   // Format de
 const CHAR_OSD_BAT_DATA = "000085e9-0002-1000-8000-00805f9b34fb";
 const CHAR_OSD_WATCH_ID = "000085e9-0003-1000-8000-00805f9b34fb";
 const CHAR_OSD_WATCH_FW = "000085e9-0004-1000-8000-00805f9b34fb";
-const CHAR_OSD_ACC_FMT  = "000085e9-0005-1000-8000-00805f9b34fb";  // Valid values are ACC_FMT_xx as shown below
-
-// Valid values of CHAR_OSD_ACC_FMT
-const ACC_FMT_8BIT = 0;
-const ACC_FMT_16BIT = 1;
-const ACC_FMT_3D = 3;
-
+const CHAR_OSD_ACC_FMT  = "000085e9-0005-1000-8000-00805f9b34fb";  // Valid values are ACC_FMT_xx as defined above
 
 // Official BLE UUIDs from https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned_Numbers.pdf
 // Also based on bootgathrm bangle app.
 const SERV_HRM = 0x180D;   // Official BLE UUID
 const CHAR_HRM = 0x2A37;   // Official BLE UUID
 const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
+
+
+// From 'sensible.js' example app
+function encodeAccel3DData(a) {
+	let x = toByteArray(a.x, 2, true);
+	let y = toByteArray(a.y, 2, true);
+	let z = toByteArray(a.z, 2, true);
+  
+	return [
+		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
+	];
+  }
+  
+  function encodeAccel16bitData(a) {
+	let x = toByteArray(int(1000*a.mag), 2, false);
+	return [
+		x[0], x[1]
+	];
+  }  
+  
+// Convert the given value to a little endian byte array
+// From 'sensible.js' example app
+function toByteArray(value, numberOfBytes, isSigned) {
+	let byteArray = new Array(numberOfBytes);
+  
+	if(isSigned && (value < 0)) {
+	  value += 1 << (numberOfBytes * 8);
+	}
+  
+	for(let index = 0; index < numberOfBytes; index++) {
+	  byteArray[index] = (value >> (index * 8)) & 0xff;
+	}
+  
+	return byteArray;
+  }
+  
+
 
 (() => {
 	var accelData = new Uint8Array(20);
@@ -197,40 +234,7 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	};
 })();
 
-// From 'sensible.js' example app
-function encodeAccel3DData(a) {
-	let x = toByteArray(a.x, 2, true);
-	let y = toByteArray(a.y, 2, true);
-	let z = toByteArray(a.z, 2, true);
-  
-	return [
-		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
-	];
-  }
-  
-  function encodeAccel16bitData(a) {
-	let x = toByteArray(int(1000*a.mag), 2, false);
-	return [
-		x[0], x[1]
-	];
-  }  
-  
-// Convert the given value to a little endian byte array
-// From 'sensible.js' example app
-function toByteArray(value, numberOfBytes, isSigned) {
-	let byteArray = new Array(numberOfBytes);
-  
-	if(isSigned && (value < 0)) {
-	  value += 1 << (numberOfBytes * 8);
-	}
-  
-	for(let index = 0; index < numberOfBytes; index++) {
-	  byteArray[index] = (value >> (index * 8)) & 0xff;
-	}
-  
-	return byteArray;
-  }
-  
+
 
 // Uncomment for testing in RAM using webIDE
 //Bangle.drawWidgets();
