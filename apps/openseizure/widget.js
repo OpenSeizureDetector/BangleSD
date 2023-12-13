@@ -19,7 +19,7 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.14c";
+const WATCH_FW = "0.14";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
 const USE_TEST_ACC_DATA = true;  // FIXME - does not send real data
