@@ -19,10 +19,10 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.14";
+const WATCH_FW = "0.15";
 const WATCH_ID = "BangleJs";
 const ACC_FMT = ACC_FMT_3D;
-const USE_TEST_ACC_DATA = true;  // FIXME - does not send real data
+const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";   // Format depends on the value of CHAR_OSD_ACC_FMT
@@ -54,9 +54,9 @@ function encodeAccel3DData(a) {
 		y = toByteArray(getTestVal(),2, true);
 		z = toByteArray(getTestVal(),2, true);
 	} else {
-		x = toByteArray(a.x, 2, true);
-		y = toByteArray(a.y, 2, true);
-		z = toByteArray(a.z, 2, true);
+		x = toByteArray(int(1000*a.x), 2, true);
+		y = toByteArray(int(1000*a.y), 2, true);
+		z = toByteArray(int(1000*a.z), 2, true);
 	}
 	return [
 		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D

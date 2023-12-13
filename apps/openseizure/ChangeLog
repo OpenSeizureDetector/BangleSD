@@ -12,3 +12,4 @@
 0.12: Fixed bug writing to non-existant OSD HR Char
 0.13: Added acceleration data format char.
 0.14: Added 3d acceleration data option and test data option
+0.15: Converted 3d data to integer milli-g
