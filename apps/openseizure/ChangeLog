@@ -11,3 +11,4 @@
 0.11: Moved FW version to const to make it easier to change
 0.12: Fixed bug writing to non-existant OSD HR Char
 0.13: Added acceleration data format char.
+0.14a: Added 3d acceleration data option
