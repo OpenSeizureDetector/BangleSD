@@ -21,7 +21,7 @@ const ACC_FMT_3D = 3;
 // Build Configuration
 const WATCH_FW = "0.17";
 const WATCH_ID = "BangleJs";
-const ACC_FMT = ACC_FMT_3D;
+//const ACC_FMT = ACC_FMT_3D;   // Now defined in openseizure.json
 const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
@@ -89,6 +89,8 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	var batteryLevel = 0;
 	var hrVal = 0;
 
+	var settings = require('Storage').readJSON("openseizure.json", true) || {};
+
 	function draw() {
 		// Draw the OSD Icon
 		g.reset();
@@ -100,7 +102,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	Bangle.on('accel',function(a) {
 		let accArr = [];
 		let n = 0;
-		switch (ACC_FMT) {
+		switch (settings.ACC_FMT) {
 			case ACC_FMT_8BIT:  // 8 bit vector magnitude scaled so 1g=64
 				// Calculate vector magnitude of acceleration measurement, and scale it so 1g is value 64 (so we cover 0 to 4g)
 				accelData[accelIdx++] = E.clip(a.mag*64,0,255);
@@ -202,7 +204,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 		readable : true
 	};
 	var charOsdAccFmt = {
-		value : ACC_FMT,
+		value : settings.ACC_FMT,
 		maxLen : 1,
 		readable : true
 	};
