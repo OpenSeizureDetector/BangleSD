@@ -19,7 +19,7 @@ const ACC_FMT_3D = 3;
 
 /////////////////////////////////
 // Build Configuration
-const WATCH_FW = "0.17";
+const WATCH_FW = "0.18";
 const WATCH_ID = "BangleJs";
 //const ACC_FMT = ACC_FMT_3D;   // Now defined in openseizure.json
 const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
@@ -80,7 +80,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	return byteArray;
   }
   
-
+  const saveSettings = () => require('Storage').write('openseizure.json', settings);
 
 (() => {
 	var accelData = new Uint8Array(20);
@@ -88,8 +88,11 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	var accelArrayFull = false;
 	var batteryLevel = 0;
 	var hrVal = 0;
-
-	var settings = require('Storage').readJSON("openseizure.json", true) || {};
+	var settings = Object.assign({
+		ACC_FMT : 0,
+		TEST_MODE : false
+	  }, require('Storage').readJSON('openseizure.json',1)||{});
+	saveSettings();
 
 	function draw() {
 		// Draw the OSD Icon
