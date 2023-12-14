@@ -2,7 +2,7 @@
   "id": "openseizure",
   "name": "OpenSeizureDetector Widget",
   "shortName": "OSD",
-  "version": "0.18",
+  "version": "0.19",
   "description": "[BETA!] A widget to work alongside [OpenSeizureDetector](https://www.openseizuredetector.org.uk/)",
   "icon": "widget.png",
   "type": "widget",
@@ -10,7 +10,8 @@
     "supports": ["BANGLEJS", "BANGLEJS2"],
   "readme": "README.md",
   "storage": [
-    {"name":"openseizure.wid.js","url":"widget.js"}
+    {"name":"openseizure.wid.js","url":"widget.js"},
+    {"name":"openseizure.settings.js","url":"settings.js"},
   ],
   "data": [{"name":"openseizure.json"}]
 }
