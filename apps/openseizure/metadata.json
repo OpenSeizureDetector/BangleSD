@@ -11,7 +11,7 @@
   "readme": "README.md",
   "storage": [
     {"name":"openseizure.wid.js","url":"widget.js"},
-    {"name":"openseizure.settings.js","url":"settings.js"},
+    {"name":"openseizure.settings.js","url":"settings.js"}
   ],
   "data": [{"name":"openseizure.json"}]
 }
