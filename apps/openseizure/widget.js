@@ -93,7 +93,7 @@ function saveSettings(settings) {
 	var settings = Object.assign({
 		ACC_FMT : 0,
 		TEST_MODE : false
-	  }, require('Storage').readJSON('openseizure.json',1)||{});
+	}, require('Storage').readJSON('openseizure.json',1)||{});
 	saveSettings(settings);
 
 	function draw() {

@@ -5,7 +5,7 @@
     var settings = Object.assign({
 		ACC_FMT : 0,
 		TEST_MODE : false
-	  }, require('Storage').readJSON(FILE,1)||{});
+	}, require('Storage').readJSON(FILE,1)||{});
   
     function writeSettings() {
       require('Storage').writeJSON(FILE, settings);
