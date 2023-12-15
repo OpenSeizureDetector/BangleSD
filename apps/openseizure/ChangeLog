@@ -17,3 +17,4 @@
 0.17: Changed int(x) to Math.round(x).
 0.18: Added json configuration file
 0.19: Added settings screen
+0.20: Fixed 3d data and settings screen.  Re-added test mode

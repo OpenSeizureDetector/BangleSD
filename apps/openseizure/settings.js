@@ -13,7 +13,7 @@
     }
   
     // Show the menu
-    E.showMenu({
+    const osdMenu = {
       "" : { "title" : "App Name" },
       "< Back" : () => back(),
       'TEST_MODE': {
@@ -22,6 +22,7 @@
         onchange: v => {
           settings.TEST_MODE = v;
           writeSettings();
+          E.showMenu(osdMenu);
         }
       },
       'ACC_FMT': {
@@ -30,7 +31,9 @@
         onchange: v => {
           settings.ACC_FMT = v;
           writeSettings();
+          E.showMenu(osdMenu);
         }
       },
-    });
+    };
+    E.showMenu(osdMenu);
   })  //(load)

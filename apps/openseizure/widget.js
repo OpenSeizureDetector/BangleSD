@@ -11,18 +11,17 @@
 
 // Uncomment for testing in ram using webIDE (https://espruino.com/ide)
 //WIDGETS = {};
+const DEBUG = false;
 
 // Valid values of CHAR_OSD_ACC_FMT
 const ACC_FMT_8BIT = 0;
 const ACC_FMT_16BIT = 1;
 const ACC_FMT_3D = 3;
 
-/////////////////////////////////
+
 // Build Configuration
-const WATCH_FW = "0.19";
+const WATCH_FW = "0.20";
 const WATCH_ID = "BangleJs";
-//const ACC_FMT = ACC_FMT_3D;   // Now defined in openseizure.json
-const USE_TEST_ACC_DATA = false;  // FIXME - does not send real data when set to true
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
 const CHAR_OSD_ACC_DATA = "000085e9-0001-1000-8000-00805f9b34fb";   // Format depends on the value of CHAR_OSD_ACC_FMT
@@ -38,27 +37,79 @@ const CHAR_HRM = 0x2A37;   // Official BLE UUID
 const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
 
-var testAccVal = 0;
+(() => {
+	var accelData = new Uint8Array(20);
+	var accelIdx = 0;
+	var accelArrayFull = false;
+	var batteryLevel = 0;
+	var hrVal = 0;
+	var testAccVal = 0;
+	var settings = {}; 
 
+
+	function draw() {
+		// Draw the OSD Icon
+		g.reset();
+		g.drawImage(E.toArrayBuffer(atob("GBiEBAAAAAABEREQAAAAAAAAAAAKmZkgAAAAAAAAAAAKmZkgAAAAAAAAAAAKkzkgAAAAAAACIQAKkzkgABIgAAAZmSAKPykgApmRAAApmZoqMjkiqZmSAAKZmZmZ8zmpmZmZIAKZmZmZMzmZmZmZIAEpmZmZkzqZmZmSEAACqZmZkjOZmZogAAAAApmZkjOZmSAAAAAAApmZn/mZmSAAAAACqZmZrymZmZogAAEpmZmZkzmZmZmSEAqZmZmZkjqZmZmZoAKZmZmamvmpmZmZIAApmZIan6mhKZmSAAAZmiAKkymgAqmRAAACIAAKkimgAAIgAAAAAAAKkimgAAAAAAAAAAAKmZmgAAAAAAAAAAAKmZmgAAAAAAAAAAABEREQAAAAAA==")), this.x, this.y);
+	}
+
+
+	function saveSettings(settings) {    
+		require('Storage').write('openseizure.json', settings);
+		}
+	
+	function reload() {
+		settings = Object.assign({
+			ACC_FMT : 0,
+			TEST_MODE : false
+		}, require('Storage').readJSON('openseizure.json',1)||{});
+		saveSettings(settings);
+	}
+	
+	
+
+// Generate a 16bit integer sequence to make testing easier than using real data
 function getTestVal() {
 	let retVal = testAccVal;
 	testAccVal += 1;
+	if (testAccVal > 0xffff) {
+		testAccVal = 0
+	}
 	return retVal;
 }
 
 // From 'sensible.js' example app
+// Returns the acceleration measurement as an array of 3 x 16 bit signed integers in milli-g
 function encodeAccel3DData(a) {
 	let x = 0; let y = 0; let z = 0;
-	x = toByteArray(Math.round(1000*a.x), 2, true);
-	y = toByteArray(Math.round(1000*a.y), 2, true);
-	z = toByteArray(Math.round(1000*a.z), 2, true);
+	let xVal=0; let yVal=0; let zVal=0;
+	if (settings.TEST_MODE === true) {
+		xVal = getTestVal();
+		yVal = getTestVal();
+		zVal = getTestVal();
+	} else {
+		x = Math.round(1000*a.x);
+		y = Math.round(1000*a.y);
+		z = Math.round(1000*a.z);
+	}
+
+	if (DEBUG) console.log("("+x+", "+y+", "+z+")");
+	x = toByteArray(xVal, 2, true);
+	y = toByteArray(yVal, 2, true);
+	z = toByteArray(zVal, 2, true);
+
 	return [
 		x[0], x[1], y[0], y[1], z[0], z[1] // Accel 3D
 	];
   }
   
   function encodeAccel16bitData(a) {
-	let x = toByteArray(Math.round(1000*a.mag), 2, false);
+	let x = 0;
+	if (settings.TEST_MODE === true) {
+		x = toByteArray(getTestVal(), 2, false);
+	} else {
+		toByteArray(Math.round(1000*a.mag), 2, false);
+	}
 	return [
 		x[0], x[1]
 	];
@@ -80,38 +131,15 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	return byteArray;
   }
   
-function saveSettings(settings) {    
-	require('Storage').write('openseizure.json', settings);
-	}
 
-(() => {
-	var accelData = new Uint8Array(20);
-	var accelIdx = 0;
-	var accelArrayFull = false;
-	var batteryLevel = 0;
-	var hrVal = 0;
-	var settings = Object.assign({
-		ACC_FMT : 0,
-		TEST_MODE : false
-	}, require('Storage').readJSON('openseizure.json',1)||{});
-	saveSettings(settings);
-
-	function draw() {
-		// Draw the OSD Icon
-		g.reset();
-		g.drawImage(E.toArrayBuffer(atob("GBiEBAAAAAABEREQAAAAAAAAAAAKmZkgAAAAAAAAAAAKmZkgAAAAAAAAAAAKkzkgAAAAAAACIQAKkzkgABIgAAAZmSAKPykgApmRAAApmZoqMjkiqZmSAAKZmZmZ8zmpmZmZIAKZmZmZMzmZmZmZIAEpmZmZkzqZmZmSEAACqZmZkjOZmZogAAAAApmZkjOZmSAAAAAAApmZn/mZmSAAAAACqZmZrymZmZogAAEpmZmZkzmZmZmSEAqZmZmZkjqZmZmZoAKZmZmamvmpmZmZIAApmZIan6mhKZmSAAAZmiAKkymgAqmRAAACIAAKkimgAAIgAAAAAAAKkimgAAAAAAAAAAAKmZmgAAAAAAAAAAAKmZmgAAAAAAAAAAABEREQAAAAAA==")), this.x, this.y);
-	}
-
+	//////////////////////////
+	// Main Program
+	reload();   // load settings
 
 	// accelerometer data callback.
 	Bangle.on('accel',function(a) {
 		let accArr = [];
 		let n = 0;
-		if (settings.TEST_MODE) {
-			a.x = getTestVal();
-			a.y = getTestVal();
-			a.z = getTestVal();
-		}
 		switch (settings.ACC_FMT) {
 			case ACC_FMT_8BIT:  // 8 bit vector magnitude scaled so 1g=64
 				// Calculate vector magnitude of acceleration measurement, and scale it so 1g is value 64 (so we cover 0 to 4g)
@@ -138,7 +166,7 @@ function saveSettings(settings) {
 					accelArrayFull = true;
 				break;
 			default:
-				E.showMessage("Invalid ACC_FMT", "OSD_ERROR");
+				if (DEBUG) E.showMessage("Invalid ACC_FMT", "OSD_ERROR");
 		} 
 
 		// if our accelArray buffer is full, notify BLE subscribers that there is data to collect.
@@ -172,7 +200,8 @@ function saveSettings(settings) {
 
 				NRF.updateServices(servicesCfg);
 			} catch(e) {
-				E.showMessage(e,"OSD ERROR")
+				// not normally shown because if we try to go into settings an error box appears
+				if (DEBUG) E.showMessage(e,"OSD ERROR")
 			}
 		}
 	});
@@ -252,7 +281,7 @@ function saveSettings(settings) {
 	
 	// add your widget
 	WIDGETS["openseizure"]={
-	area:"tl", width: 24, draw:draw
+	area:"tl", width: 24, draw:draw, reload:reload
 	};
 })();
 
