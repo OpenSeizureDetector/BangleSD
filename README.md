@@ -54,8 +54,8 @@ Installation
   Start the Android App (V4.2.x or higher), select "Bluetooth Device" data source, then in general settings, click the "SELECT BLE DEVICE" button to choose which watch to connect to.
 
 
-  Development
-  -----------
+Development
+-----------
     - Use the Espruino [WebIDE](https://www.espruino.com/ide/)
        - Uncomment the WIDGETS={}; and Bangle.drawWidgets(); lines from the top and bottom of the [widget.js](apps/openseizure/widget.js) file.
        - Copy the contents of widget.js into the Web IDE
@@ -64,11 +64,25 @@ Installation
     - Deploy on Github pages
        - Update [medatadata.json](apps/openseizure/metadata.json) and [Changelog](apps/openseizure/ChangeLog) so that they both contain the same version number (or the automatic Github pages build will fail).
        - Commit the changes and push to github.
-       - A github action should run to deploy the app loader to the [OpenSeizureDetector Github site](https://openseizuredetector.github.io/BangleApps/index.html?q=opens)
+       - A github action should run to deploy the app loader to the [OpenSeizureDetector Github site](https://openseizuredetector.github.io/BangleSD/index.html?q=opens)
          - Go to https://openseizuredetector.github.io/BangleApps/index.html?q=opens
          - Connect to the BangleJS watch
          - Update the OpenSeizureDetector widget
          - Disconnect from the app loader or the BLE servies will not be advertised.
+    - Command line (I don't have this working yet!)
+      - Initialise the submodules to obtain the data transfer utilities
+         - cd BangleSD
+         - git submodule init; git submodule update
+      - Install nodejs and npm, and noble library
+         - sudo apt install nodejs, npm
+         - npm install @abandonware/noble
+      - Grant root permission to node (so it can access the bluetooth system)
+         - sudo apt install libcap2-bin
+         - sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+      - Execute with core/tools/apploader.js 
+         - core/tools/apploader.js list      - lists available apps (just openseizure for this repository)
+         - core/tools/apploader.js devices   - should list available banglejs devices, but it is not returning anything for me for some reason
+         - core/tools/apploader.js install openseizure e8:76:62:9d:97:3e
 
 
 ## Credits
