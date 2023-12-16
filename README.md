@@ -69,20 +69,17 @@ Development
          - Connect to the BangleJS watch
          - Update the OpenSeizureDetector widget
          - Disconnect from the app loader or the BLE servies will not be advertised.
-    - Command line (I don't have this working yet!)
+    - Command line (Working on Ubuntu 22.04 LTS)
       - Initialise the submodules to obtain the data transfer utilities
          - cd BangleSD
          - git submodule init; git submodule update
       - Install nodejs and npm, and noble library
          - sudo apt install nodejs, npm
          - npm install @abandonware/noble
-      - Grant root permission to node (so it can access the bluetooth system)
-         - sudo apt install libcap2-bin
-         - sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
       - Execute with core/tools/apploader.js 
          - core/tools/apploader.js list      - lists available apps (just openseizure for this repository)
-         - core/tools/apploader.js devices   - should list available banglejs devices, but it is not returning anything for me for some reason
-         - core/tools/apploader.js install openseizure e8:76:62:9d:97:3e
+         - sudo core/tools/apploader.js devices   - should list available banglejs devices, but it is not returning anything for me for some reason
+         - sudo core/tools/apploader.js install openseizure  (specify the MAC address if you have more than one BangleJS device in range).
 
 
 ## Credits

@@ -20,7 +20,7 @@ const ACC_FMT_3D = 3;
 
 
 // Build Configuration
-const WATCH_FW = "0.20";
+const WATCH_FW = "0.21";
 const WATCH_ID = "BangleJs";
 
 const SERV_OSD =          "000085e9-0000-1000-8000-00805f9b34fb";
@@ -38,7 +38,7 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
 
 (() => {
-	var accelData = new Uint8Array(20);
+	var accelData = new Uint8Array(18);  // we use 18 bits rather than the maximum of 20, so we can send 3x16bit measurements
 	var accelIdx = 0;
 	var accelArrayFull = false;
 	var batteryLevel = 0;
@@ -88,9 +88,9 @@ function encodeAccel3DData(a) {
 		yVal = getTestVal();
 		zVal = getTestVal();
 	} else {
-		x = Math.round(1000*a.x);
-		y = Math.round(1000*a.y);
-		z = Math.round(1000*a.z);
+		xVal = Math.round(1000*a.x);
+		yVal = Math.round(1000*a.y);
+		zVal = Math.round(1000*a.z);
 	}
 
 	if (DEBUG) console.log("("+x+", "+y+", "+z+")");
@@ -162,7 +162,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 					accelData[accelIdx] = accArr[n];
 					accelIdx += 1
 				}
-				if (accelIdx >= (accelData.length - 6))  // One measurement needs 6 bytes (3 values at 2 bytes each)
+				if (accelIdx > (accelData.length - 3))  // One measurement needs 6 bytes (3 values at 2 bytes each)
 					accelArrayFull = true;
 				break;
 			default:
@@ -222,7 +222,7 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	// Define OSD Service characteristics
 	var charOsdAccData = {
 		value : accelData,
-		maxLen : 20,
+		maxLen : 18,
 		readable : true,
 		notify : true
 		};

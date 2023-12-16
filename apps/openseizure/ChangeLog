@@ -18,3 +18,4 @@
 0.18: Added json configuration file
 0.19: Added settings screen
 0.20: Fixed 3d data and settings screen.  Re-added test mode
+0.21: Reduced acceleration data length from 20 to 18 bytes so we have a whole number of 3x16bit measurements.
