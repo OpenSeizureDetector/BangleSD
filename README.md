@@ -56,7 +56,9 @@ Installation
 
   The watch should now be ready to connect to the OpenSeizureDetector Android App and send data - it will do this without starting a specific watch app as it runs in the background continuously.
 
-  Start the Android App (V4.2.x or higher), select "Bluetooth Device" data source, then in general settings, click the "SELECT BLE DEVICE" button to choose which watch to connect to.
+  By default, the watch sends acceleration data in the lowest resolution (8 bits per measurement).   For compatibility with future algorithms it would be best to send 3D data at 3x16 bits per measurement.   This can be enabled on the watch by selecting settings->apps->OSD and selecting '3' for the acceleration data format (once I am happy this is stable I will make 3d data the default).
+
+  Start the Android App (V4.2.x or higher), select "Bluetooth Device" data source, then in general settings, click the "SELECT BLE DEVICE" button to choose which watch to connect to.   After about 5 seconds the phone app should display data with 'OK' status.
 
 
 Development
