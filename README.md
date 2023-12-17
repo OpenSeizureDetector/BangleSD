@@ -23,12 +23,14 @@ Current Status
 
   - Currently in the initial testing state.   
   - V0.12 and higher runs using V4.2.x of the [OpenSeizureDetector Android App](https://github.com/OpenSeizureDetector/Android_Pebble_SD/tree/V4.2.x).
-  - It only transmits vector magnitude data to the phone, not 3d data (so works with the normal OSD algorithm, but not good for data sharing)
-  - The vector magnitude is transmitted in 8 bits per measurement, scaled to give 0-4G range.   (Need to compare this to Garmin)
-  - The BangleJS Heart rate appears higher than I would see on a Garmin (about 100 bpm rather than 60 bpm).
+  - The watch app has a settings page that allows the user to select the accelerometer data transfer mode:
+        - 0 - 8 bit vector magnitude (lowest data transfer rate, so lowest power consumption)
+        - 1 - 16 bit vector magnitude (comparable to Garmin 'low data' mode.
+        - 3 - 3 x 16 bit acceleration components (x, y, z) - most useful for Data Sharing and future algorithms, but highest power consumption.
+  - The BangleJS Heart rate appears higher than I would see on a Garmin (about 100 bpm rather than 60 bpm, unless the wearer is very still).
   - The battery indication is a bit noisy - could do with calculating an averge to reduce noise.
   - There is no feedback about the app state on the watch, no mute function.
-  - Watch battery life is good - 100% to 75% in 10 hours, so should exceed 15 hours target easily.
+  - Watch battery life is good - 100% to 75% in 10 hours, so should exceed 15 hours target easily (on 8 bit accelerometer data transfer (mode 0 above).
   - Please see the current [issues here](https://github.com/OpenSeizureDetector/BangleSD/issues).
 
 
@@ -39,13 +41,16 @@ Installation
   - Power on the BangleJS by pressing the button
   - If this is the first run, you will see an introductory presentation about how to use BangleJS
   - When it finishes, press the button again to start BangleJS
-  - In a web browser that supports WebBluetooth (e.g. Chrome), go to https://openseizuredetector.github.io/BangleSD/index.html
-  - Select the BangleJS 2 option
-  - Press the Connect button in the top right hand corner of the screen, then when your BangleJS watch appears in the search dialog box, select it and press 'Pair'
-    - If the BangleJS watch is not shown, it may still be connected to the phone - switching off bluetooth on the phone temporarily will make sure it is disconnected. 
-  - Type 'openseizuredetector' in the search box - this should find an OpenSeizureDetector widget.
-  - Select the up arrow to upload the OpenSeizureDetector widget to the watch.
-  - When it completes, press the 'Disconnect' button on the web browser.
+  - In a web browser that supports WebBluetooth (e.g. Chrome):
+     - Go to https://openseizuredetector.github.io/BangleSD/index.html
+     - Select the BangleJS 2 option
+     - Press the Connect button in the top right hand corner of the screen, then when your BangleJS watch appears in the search dialog box, select it and press 'Pair'
+     - If the BangleJS watch is not shown, it may still be connected to the phone - switching off bluetooth on the phone temporarily will make sure it is disconnected.
+     - Check the "Firmware Update", "Bootloader" and "Launcher" apps.  If they are showing a round arrow 'update' icon, press the icon button to update the apps to the latest versions.  (These are BangleJS system apps so we want to be sure users are using a known version).
+     - [optional] you can add the Heart Rate Monitor and Heart Rate Widget aps if desired.
+     - Look for the OpenSeizureDetector widget in the (short) list of available apps.
+     - Select the up arrow to upload the OpenSeizureDetector widget to the watch.
+     - When it completes, press the 'Disconnect' button on the web browser.
   - The watch should now display 'Hold Button to Reload' - press and hold the watch button.
   - When the watch re-starts it should show the OpenSeizureDetector logo in the top left hand corner of the screen.
 
