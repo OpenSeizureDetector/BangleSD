@@ -34,19 +34,26 @@ function onHRM(h) {
 Bangle.on('HRM', onHRM);
 
 function updateHrm(){
+
+  // draw the very small 'confidence' line.
   var px = g.getWidth()/2;
   g.setFontAlign(0,-1);
   g.clearRect(0,24,g.getWidth(),80);
   g.setFont("6x8").drawString(/*LANG*/"Confidence "+(hrmInfo.confidence || "--")+"%", px, 70);
 
+  // Update the graph scale display
   updateScale();
 
+  // Draw the large BPM and %confidence line.
   g.setFontAlign(0,0);
   var str = hrmInfo.bpm || "--";
+  px = px - 20;
   g.setFontVector(40).setColor(hrmInfo.confidence > 50 ? g.theme.fg : "#888").drawString(str,px,45);
   px += g.stringWidth(str)/2;
   g.setFont("6x8").setColor(g.theme.fg);
   g.drawString(/*LANG*/"BPM",px+15,45);
+  g.setFontVector(20).drawString((hrmInfo.confidence || "--")+"%", px+50, 45);
+
 }
 
 function updateScale(){
@@ -61,6 +68,8 @@ var MID = (g.getHeight()+80)/2;
 /* On newer (2v10) firmwares we can subscribe to get
 HRM events as they happen */
 Bangle.on('HRM-raw', function(v) {
+  // Draw the solid line, which is the low-pass filtered version of the HRM output.
+  // The un-filtered HRM output seems to be drawn in readHrm().
   h=v;
   hrmOffset++;
   if (hrmOffset>g.getWidth()) {
