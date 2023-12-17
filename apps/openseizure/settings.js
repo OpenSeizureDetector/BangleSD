@@ -34,6 +34,21 @@
           E.showMenu(osdMenu);
         }
       },
+      'HR_CONF_THRESH': {
+        value: 0|settings.HR_CONF_THRESH,  // 0| converts undefined to 0
+        min: 0,
+        max : 100,
+        step: 5,
+        format: x => {
+          return x + "%";
+        },
+        onchange: v => {
+          settings.HR_CONF_THRESH = v;
+          writeSettings();
+          E.showMenu(osdMenu);
+        }
+      },
+
     };
     E.showMenu(osdMenu);
   })  //(load)

@@ -61,7 +61,8 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	function reload() {
 		settings = Object.assign({
 			ACC_FMT : 0,
-			TEST_MODE : false
+			TEST_MODE : false,
+			HR_CONF_THRESH : 60
 		}, require('Storage').readJSON('openseizure.json',1)||{});
 		saveSettings(settings);
 	}
@@ -209,7 +210,11 @@ function toByteArray(value, numberOfBytes, isSigned) {
 	// Initialise the HRM
 	Bangle.setHRMPower(1);
 	Bangle.on('HRM', function(hrm) { 
-		hrVal = hrm['bpm'];
+		if (hrm.confidence > settings.HR_CONF_THRESH)
+			hrVal = hrm['bpm'];
+		else
+			hrVal = -1;
+		//hrVal = 100*hrm['confidence']  // FIXME - this is just for testing
 	});
 
 
