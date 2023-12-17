@@ -45,7 +45,9 @@ Installation
      - Go to https://openseizuredetector.github.io/BangleSD/index.html
      - Select the BangleJS 2 option
      - Press the Connect button in the top right hand corner of the screen, then when your BangleJS watch appears in the search dialog box, select it and press 'Pair'
-     - If the BangleJS watch is not shown, it may still be connected to the phone - switching off bluetooth on the phone temporarily will make sure it is disconnected. 
+     - If the BangleJS watch is not shown, it may still be connected to the phone - switching off bluetooth on the phone temporarily will make sure it is disconnected.
+     - Check the "Firmware Update", "Bootloader" and "Launcher" apps.  If they are showing a round arrow 'update' icon, press the icon button to update the apps to the latest versions.  (These are BangleJS system apps so we want to be sure users are using a known version).
+     - [optional] you can add the Heart Rate Monitor and Heart Rate Widget aps if desired.
      - Look for the OpenSeizureDetector widget in the (short) list of available apps.
      - Select the up arrow to upload the OpenSeizureDetector widget to the watch.
      - When it completes, press the 'Disconnect' button on the web browser.
