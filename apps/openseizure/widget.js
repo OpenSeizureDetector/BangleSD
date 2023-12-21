@@ -36,7 +36,10 @@ const SERV_HRM = 0x180D;   // Official BLE UUID
 const CHAR_HRM = 0x2A37;   // Official BLE UUID
 const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
-
+/**
+ * Main Program
+ * I think we wrap it in a function to localise variable scope.
+ */
 (() => {
 	var accelData = new Uint8Array(18);  // we use 18 bits rather than the maximum of 20, so we can send 3x16bit measurements
 	var accelIdx = 0;
@@ -48,17 +51,31 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 
 
 	function draw() {
+		/**
+		 * Draw the widget icon
+		 * TODO - change the icon colour depending on the analysis results
+		 *         OK, WARNING, ALARM etc.
+		 */
 		// Draw the OSD Icon
 		g.reset();
 		g.drawImage(E.toArrayBuffer(atob("GBiEBAAAAAABEREQAAAAAAAAAAAKmZkgAAAAAAAAAAAKmZkgAAAAAAAAAAAKkzkgAAAAAAACIQAKkzkgABIgAAAZmSAKPykgApmRAAApmZoqMjkiqZmSAAKZmZmZ8zmpmZmZIAKZmZmZMzmZmZmZIAEpmZmZkzqZmZmSEAACqZmZkjOZmZogAAAAApmZkjOZmSAAAAAAApmZn/mZmSAAAAACqZmZrymZmZogAAEpmZmZkzmZmZmSEAqZmZmZkjqZmZmZoAKZmZmamvmpmZmZIAApmZIan6mhKZmSAAAZmiAKkymgAqmRAAACIAAKkimgAAIgAAAAAAAKkimgAAAAAAAAAAAKmZmgAAAAAAAAAAAKmZmgAAAAAAAAAAABEREQAAAAAA==")), this.x, this.y);
 	}
 
 
-	function saveSettings(settings) {    
+	function saveSettings(settings) { 
+		/**
+		 * Write the settings object to an external json file 
+		 * which is retrieved on start-up
+		 *  */   
 		require('Storage').write('openseizure.json', settings);
 		}
 	
 	function reload() {
+		/**
+		 * Load the settings object from the external json file.
+		 * Default values are defined here for any parameters that
+		 * are not in the file.
+		 */
 		settings = Object.assign({
 			ACC_FMT : 0,
 			TEST_MODE : false,
@@ -69,9 +86,12 @@ const CHAR_HR_LOC = 0x2A38; // Official BLE Sensor Location UUID
 	
 	
 
-// Generate a 16bit integer sequence to make testing easier than using real data
 function getTestVal() {
-	let retVal = testAccVal;
+	/**
+	 *  Generate a 16bit integer sequence to make testing 
+	 *  easier than using real data
+	 */
+    let retVal = testAccVal;
 	testAccVal += 1;
 	if (testAccVal > 0xffff) {
 		testAccVal = 0
@@ -79,9 +99,12 @@ function getTestVal() {
 	return retVal;
 }
 
-// From 'sensible.js' example app
-// Returns the acceleration measurement as an array of 3 x 16 bit signed integers in milli-g
 function encodeAccel3DData(a) {
+	/**
+	 * Based on 'sensible.js' example app
+     * Returns the acceleration measurement as an array of 
+	 * 3 x 16 bit signed integers in milli-g
+	 */
 	let x = 0; let y = 0; let z = 0;
 	let xVal=0; let yVal=0; let zVal=0;
 	if (settings.TEST_MODE === true) {
@@ -105,6 +128,10 @@ function encodeAccel3DData(a) {
   }
   
   function encodeAccel16bitData(a) {
+	/**
+	 * Encode the acceleration reading as a 16 bit vector
+	 * magnitude unsigned integer in milli-g
+	 */
 	let x = 0;
 	if (settings.TEST_MODE === true) {
 		x = toByteArray(getTestVal(), 2, false);
@@ -116,9 +143,12 @@ function encodeAccel3DData(a) {
 	];
   }  
   
-// Convert the given value to a little endian byte array
-// From 'sensible.js' example app
+  
 function toByteArray(value, numberOfBytes, isSigned) {
+	/**
+	 * Convert the given value to a little endian byte array
+	 *  From 'sensible.js' example app
+	 */
 	let byteArray = new Array(numberOfBytes);
   
 	if(isSigned && (value < 0)) {
