@@ -6,12 +6,16 @@
     WIDGETS.widhrt.draw();
   };
 
-  var bp = Math.round(Bangle.getHealthStatus().bpm||Bangle.getHealthStatus("last").bpm);
+  //var bp = Math.round(Bangle.getHealthStatus().bpm||Bangle.getHealthStatus("last").bpm);
+  var bp = 0;
   
   Bangle.on('HRM',(e)=>{
     //console.log('onHrm');
-    if (e && e.confidence>60) bp = Math.round(e.bpm);
-    if (bp == 0) bp = Math.round(Bangle.getHealthStatus().bpm||Bangle.getHealthStatus("last").bpm);
+    if (e && e.confidence>60) 
+      bp = Math.round(e.bpm);
+    else
+      bp = 0;
+    //if (bp == 0) bp = Math.round(Bangle.getHealthStatus().bpm||Bangle.getHealthStatus("last").bpm);
     WIDGETS["widhrt"].draw();
   });
   
@@ -32,7 +36,11 @@
     g.fillRect(this.x, this.y, this.x + this.width, this.y + 23); // erase background
     g.setColor(g.theme.fg);
     g.setFontAlign(-1, 0);
-    g.drawString(bp, this.x, this.y + 12);
+    if (bp>0) 
+      g.drawString(bp, this.x, this.y + 12);
+    else
+      g.drawString("-", this.x, this.y + 12);
+
     var x = this.x + text_w + 3;
 
     // draw image
