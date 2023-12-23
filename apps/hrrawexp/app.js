@@ -46,7 +46,7 @@ function update_timer() {
         g.flip();
 }
 
-function btn2Pressed() {
+function increaseTimeValue() {
     if (!logging_started) {
         if (counter < 120)
             counter += 15;
@@ -56,7 +56,7 @@ function btn2Pressed() {
     }
 }
 
-function btn3Pressed() {
+function decreaseTimeValue() {
     if (!logging_started) {
         if (counter > 15)
             counter -= 15;
@@ -66,7 +66,7 @@ function btn3Pressed() {
     }
 }
 
-function btn1Pressed() {
+function startTimer() {
   if (!logging_started) {
       var filename = "";
       var fileset = false;
@@ -127,19 +127,19 @@ var HRConfidence = 0;
 
 update_timer();
 
-setWatch(btn1Pressed, BTN1, { repeat: true });
+setWatch(startTimer, BTN1, { repeat: true });
 //setWatch(btn2Pressed, BTN2, { repeat: true });
 //setWatch(btn3Pressed, BTN3, { repeat: true });
 
 Bangle.on("swipe",function(directionLR, directionUD){
     if (1==directionLR){
-        btn1Pressed();
+        increaseTimeValue();
     }
     else if (-1==directionUD || directionUD==1){
-        btn2Pressed();
+        startTimer();
     }
    else if(directionLR == -1){
-        btn3Pressed();
+        decreaseTimeValue();
      }
  });
 
@@ -147,11 +147,12 @@ Bangle.on('HRM-raw', function (hrm) {
         value = hrm.raw;
         filt = hrm.filt;
         //var dataArray = [value,filt,HRVal,HRConfidence];
-        file.write(value + "," + filt + "\n");
+        file.write(getTime() + "," + value + "," + filt 
+                + "," + HRVal + "," + HRConfidence + "\n");
 });
-/*
+
 Bangle.on('HRM', function (hrmB) {
         HRVal = hrmB.bpm;
         HRConfidence = hrmB.confidence;
 });
-*/
+
