@@ -239,6 +239,10 @@ function toByteArray(value, numberOfBytes, isSigned) {
 
 	// Initialise the HRM
 	Bangle.setHRMPower(1);
+	Bangle.setOptions({
+		hrmSportMode: 1,
+		hrmGreenAdjust: true
+		});
 	Bangle.on('HRM', function(hrm) { 
 		if (hrm.confidence > settings.HR_CONF_THRESH)
 			hrVal = hrm['bpm'];
