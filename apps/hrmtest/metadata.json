@@ -1,0 +1,16 @@
+{
+  "id": "hrmtest",
+  "name": "HRM Sensor Test",
+  "shortName": "HRM_Test",
+  "version": "0.06",
+  "description": "Test various HRM configuration options",
+  "icon": "app-icon.png",
+  "tags": "",
+  "readme": "README.md",
+  "interface": "interface.html",
+  "supports": ["BANGLEJS","BANGLEJS2"],
+  "storage": [
+    {"name":"hrmtest.app.js","url":"app.js"},
+    {"name":"hrmtest.img","url":"app-icon.js","evaluate":true}
+  ]
+}
