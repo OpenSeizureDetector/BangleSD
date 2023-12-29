@@ -13,12 +13,11 @@
 var counter = 15;
 var logging_started;
 var interval;
-var value;
-var filt;
 
 var fileClosed = 0;
-var Storage = require("Storage");
+//var Storage = require("Storage");
 var file;
+var fileName;
 
 var screenSize = g.getHeight();
 var screenH = g.getHeight();
@@ -26,7 +25,7 @@ var screenW = g.getWidth();
 var textOriginY = 0;
 var textOriginX = 0;
 var textW = screenW;
-var textH = screenH/3;
+var textH = screenH/2;
 var graphOriginX = 0;
 var graphOriginY = textOriginY + textH + 1;
 var graphH = screenH - textH;
@@ -35,7 +34,13 @@ var graphW = screenW;
 var HRVal = 0;          // latest HRM readings
 var HRConfidence = 0;
 var rawVals = [];     // Raw values read by i2c
-var algVals = [];     // Raw values read from analogue pin.
+rawVals.push(0);
+var anlgVals = [];     // Raw values read from analogue pin.
+anlgVals.push(0);
+var envVals = [];     // Environment values by i2c
+envVals.push(0);
+var timeVals = [];
+timeVals.push(getTime());
 var rawBufSize = screenW;
 
 var ledCurrentVals = [0x30, 0x50, 0x5A, 0xE0];
@@ -75,26 +80,31 @@ function drawText() {
   g.drawString(HRConfidence+"%", textOriginX+70, y);
   g.setFont("6x8", 2);
   if (logging_started) {
-    g.drawString("RUN", textOriginX+115, y);
+    g.drawString(fileName, textOriginX+115, y);
   } else {
     g.drawString("STOP", textOriginX+115, y);
   }
-
   y = y + 28;
-  g.setFont("6x8", 3);
+  g.setFont("6x8", 2);
+  g.drawString(rawVals[rawVals.length -1], textOriginX + 0, y);
+  g.drawString(envVals[envVals.length -1], textOriginX + 70, y);
+  g.drawString(anlgVals[anlgVals.length -1], textOriginX + 130, y);
+
+  y = y + 20;
+  g.setFont("6x8", 2);
   g.drawString(slot0LedCurrentVal, textOriginX + 0, y);
   g.drawString(ledCurrentIdx, textOriginX + 70, y);
-  g.drawString(rawVals.length, textOriginX + 130, y);
+  g.drawString((timeVals[timeVals.length-1]-timeVals[0])+"s", textOriginX + 130, y);
 
-  g.setFont("6x8", 2);
+  //g.setFont("6x8", 2);
   //g.setFontAlign(-1, -1);
-  g.drawString("+", screenSize-10, screenSize/2);
-  g.drawString("-", 10, screenSize/2);
-  g.drawString("GO",screenSize/2 , (screenSize/2)+(screenSize/5));
+  //g.drawString("+", screenSize-10, screenSize/2);
+  //g.drawString("-", 10, screenSize/2);
+  //g.drawString("GO",screenSize/2 , (screenSize/2)+(screenSize/5));
   //g.setColor("#ffffff");
   //g.setFontAlign(0, 0); // center font
-  g.setFont("6x8", 4);
-  g.drawString("^",screenSize/2 , 150);
+  //g.setFont("6x8", 4);
+  //g.drawString("^",screenSize/2 , 150);
 
   drawGraph();
   g.flip();
@@ -102,27 +112,62 @@ function drawText() {
 
 
 function drawGraph() {
+  let i = 0;
+  let y = 0;
   //g.clear();
   g.clearRect(graphOriginX,graphOriginY,graphOriginX + graphW, graphOriginY + graphH);
-  var minVal = rawVals[0];
-  var maxVal = minVal;
-  for (var i=0;i<rawVals.length; i++) {
+
+  // Draw raw values as solid bars
+  let minVal = rawVals[0];
+  let maxVal = minVal;
+  for (i=0;i<rawVals.length; i++) {
     if (rawVals[i]<minVal) minVal = rawVals[i];
     if (rawVals[i]>maxVal) maxVal = rawVals[i];
   }
-  var yMin = screenH;
-  var yMax = graphOriginY;
-  console.log("drawGraph() - minVal="+minVal+", maxVal="+maxVal);
-  for (var i=0;i<rawVals.length-1; i++) {
-    var y = yMin + (rawVals[i]-minVal)*(yMax-yMin)/(maxVal-minVal);
-    g.drawRect(i,yMin,i+1,y);
+  let yMin = screenH;
+  let yMax = graphOriginY;
+  for (i=0;i<rawVals.length-1; i++) {
+    y = yMin + (rawVals[i]-minVal)*(yMax-yMin)/(maxVal-minVal);
+    if (y < yMax) y = yMax;   // Screen is inverted, so comparison looks wrong!
+    if (y > yMin) y = yMin;
+    g.setColor('#ff0000').drawRect(i,yMin,i+1,y);
   }
+  console.log("drawGraph() - minVal="+minVal
+    +", maxVal="+maxVal 
+    + ", yMin="+yMin
+    +", yMax="+yMax
+    +", y="+y);
+
+    // Draw analogue values as a line
+    minVal = anlgVals[0];
+    maxVal = minVal;
+    for (i=0;i<anlgVals.length; i++) {
+      if (anlgVals[i]<minVal) minVal = anlgVals[i];
+      if (anlgVals[i]>maxVal) maxVal = anlgVals[i];
+    }
+    let lastPoint = [0,0]
+    for (i=0;i<anlgVals.length-1; i++) {
+      y = yMin + (anlgVals[i]-minVal)*(yMax-yMin)/(maxVal-minVal);
+      if (y < yMax) y = yMax;   // Screen is inverted, so comparison looks wrong!
+      if (y > yMin) y = yMin;
+      g.setColor('#000000').drawLine(lastPoint[0],lastPoint[1],i+1,y);
+      lastPoint=[i, y];
+    }
+  
 }
 
 function setLedCurrent() {
   console.log("setLedCurrent()");
   Bangle.hrmWr(0x17,slot0LedCurrentVal);
   //Bangle.hrmWr(0x19, ledCurrentVals[ledCurrentIdx]);
+}
+
+function getLedCurrent() {
+  /**
+   * Read the LED current registers from the HRM and populate the relevant global variables.
+   */
+  slot0LedCurrentVal = Bangle.hrmRd(0x17,0);
+  ledCurentIdx = Bangle.hrmRd(0x19);
 }
 
 function changeLedCurrent(changeVal) {
@@ -154,9 +199,13 @@ function changeSlot0Current(changeVal) {
 }
 
 function initialiseHrm() {
+  Bangle.setLCDPower(1);
   Bangle.setHRMPower(1);
   Bangle.setOptions({
-    hrmGreenAdjust: false
+    backlightTimeout:0,
+    powerSave:false,
+    hrmPushEnv:true,
+    hrmGreenAdjust: true
   });
   setLedCurrent();
 
@@ -165,14 +214,14 @@ function initialiseHrm() {
 function startStopHrm() {
   if (!logging_started) {
     console.log("startStopHrm - starting");
-    var filename = "";
+    fileName = "";
     var fileset = false;
 
     for (let i = 0; i < 5; i++) {
-      filename = "HRM_data" + i.toString() + ".csv";
-      if(fileExists(filename) == 0){
-        file = require("Storage").open(filename,"w");
-        console.log("creating new file " + filename);
+      fileName = "HRM_" + i.toString() + ".csv";
+      if(fileExists(fileName) == 0){
+        file = require("Storage").open(fileName,"w");
+        console.log("creating new file " + fileName);
         fileset = true;
       }
       if(fileset){
@@ -181,12 +230,13 @@ function startStopHrm() {
     }
 
     if (!fileset){
-      console.log("overwiting file");
-      file = require("Storage").open("HRM_data.csv","w");
+      fileName = "HRM_0.csv";
+      console.log("overwiting file "+fileName);
+      file = require("Storage").open(fileName,"w");
     }
 
     file.write("");
-    file = require("Storage").open(filename,"a");
+    file = require("Storage").open(fileName,"a");
 
     //launchtime = 0 | getTime();
     //file.write(launchtime + "," + "\n");
@@ -208,20 +258,25 @@ function startStopHrm() {
   }
 }
 
-function fmtMSS(e) {
-    h = Math.floor(e / 3600);
-    e %= 3600;
-    m = Math.floor(e / 60);
-    s = e % 60;
-    return h + ":" +  m + ':' + s;
-}
 
 function countDownTimerCallback() {
   /**
    * Called once per second by timer 'interval'
    */
+  Bangle.setLocked(false);   // Prevent the touch screen locking so we can use scroll inputs
+  getLedCurrent();
   drawText();
 }
+
+
+function fmtMSS(e) {
+  h = Math.floor(e / 3600);
+  e %= 3600;
+  m = Math.floor(e / 60);
+  s = e % 60;
+  return h + ":" +  m + ':' + s;
+}
+
 
 ///////////////////////////////////////
 // Main Program 
@@ -248,19 +303,31 @@ Bangle.on("swipe",function(directionLR, directionUD){
 
 console.log("Registering raw hrm data callback");
 Bangle.on('HRM-raw', function (hrm) {
-        value = hrm.raw;
-        filt = hrm.filt;
-        let alg = Math.round(analogRead(29)* 16383);
-        rawVals.push(alg); // FIXME - pushing analogue value for testing
-        //algVals.push(alg)
+        let value = hrm.raw;
+        let filt = hrm.filt;
+        let valueA = Math.round(analogRead(29)* 16383);
+        rawVals.push(value); 
+        anlgVals.push(valueA);
+        timeVals.push(getTime());
         if (rawVals.length > rawBufSize) {
           rawVals.shift();
-          //algVals.shift();
+          anlgVals.shift();
+          timeVals.shift();
         }
-        //var dataArray = [value,filt,HRVal,HRConfidence];
-        file.write(getTime() + "," + value + "," + filt 
-                + "," + HRVal + "," + HRConfidence + "\n");
+        file.write(timeVals[timeVals.length-1] + "," + value + "," + filt 
+                + "," + valueA + "," + envVals[envVals.length-1] + "," + HRVal + "," + HRConfidence + "\n");
 });
+
+console.log("Registering hrm environment data callback");
+Bangle.on('HRM-env', function (hrm) {
+        let value = hrm;
+        envVals.push(value); 
+        if (envVals.length > rawBufSize) {
+          envVals.shift();
+        }
+});
+
+
 
 console.log("Registering hrm values callback");
 Bangle.on('HRM', function (hrmB) {
@@ -268,7 +335,8 @@ Bangle.on('HRM', function (hrmB) {
         HRConfidence = hrmB.confidence;
 });
 
-drawText();
+// Start logging
+startStopHrm();
 
 
 

@@ -1,20 +1,25 @@
-Extract hrm raw signal data to CSV file
-=======================================
+Display and Log HRM Raw Data
+============================
 
-Simple app that will run the heart rate monitor for a defined period of time you set at the start and record data to a csv file.
+When started, this app starts the HRM and displays a number of values on a 3x3 grid,
+with a graph below.
 
-Updated to work with new API and includes support for Bangle.js 2. Additional capability includes:
+The values displayed are:
+| HR (bpm) | Confidence (%) | Log Filename |
+| Latest Raw Reading | Latest Environment Reading | Latest Analogue Reading |
+| Register 0x17 LED Intensity | Register 0x19 LED Intensity | Period (seconds) covered by the graph | 
 
-1. Now also records upto 2 hours - if you cancel at any time the CSV file will still be there, the timer you set at the start is more so that you get an alert when it's complete.
-2. Along with raw PPG readings, it also records bandpassed filtered data in a second column, available in the new API.
-3. Rather than overwriting 1 data file, the app will record upto 5 files before recording to a generic data file as a fallback if all 5 allocated files remain on the watch storage. The limit is in place to avoid going over storage limits as these files can get large over time.
+Pressing the physical watch button stopps the logging and saves the file - it can be retrieved using the espruino [web IDE](https://www.espruino.com/ide/)
 
--The hrm sensor is sampled @50Hz on the Bangle.JS 1 and 25Hz on the Bangle 2 by default. At least on the Bangle 2 you can change the sample rate by using the 'custom boot code' app and running this line:
-Bangle.setOptions({hrmPollInterval:20});­
+It is pretty rough as an application at the moment, but if you run it for a few seconds you can see things changing which is useful.   The issues I know about with it are listed below - I will fix them soon, unless I abandon BanlgleJS in favour of PineTime for a while given the amount of trouble this HRM is causing!
 
-the 20 in the boot code means the hrm will poll every 20ms (50Hz) instead of the default 40. 
+Notes / issues:
+  - This version has the hrmGreenAdjust option set to true, so you can see the HRM device changing the LED intensity.
+  - If you change hrmGreenAdjust to false in the source code you should be able to change the LED intensity  with vertical swipes of the screen.
+  - The environment intensity callback is never triggered for some reason, so this is always zero.
+  - The register 0x19 value does not seem to change.
+  - It is supposed to only maintain 170 hrm readings, so the graph should cover just under 7
+  seconds of data - but something is not right about how I am managing the data arrays because the data period keeps going up.
+  - The Analoge value is read from pin 29 as recommended here: https://forum.espruino.com/comments/17236199/, but I do not think it is reading the heart rate value.
 
-4. On the bangle.JS 2 you can swipe up to begin recording, and on the Bangle.JS 1 you just use the top button.
 
-For Bangle 1, there is an example Python script that can process this signal, smooth it and also extract a myriad of heart rate variability metrics using the hrvanalysis library. I will be working on a method for Bangle 2 because the data seems more noisy so will need a different processing method:
-https://github.com/jabituyaben/BangleJS-HRM-Signal-Processing
