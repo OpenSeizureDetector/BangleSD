@@ -30,24 +30,88 @@ var graphOriginX = 0;
 var graphOriginY = textOriginY + textH + 1;
 var graphH = screenH - textH;
 var graphW = screenW;
+var lastRawTime = 0;
 
 var HRVal = 0;          // latest HRM readings
 var HRConfidence = 0;
-var rawVals = [];     // Raw values read by i2c
-rawVals.push(0);
-var anlgVals = [];     // Raw values read from analogue pin.
-anlgVals.push(0);
-var envVals = [];     // Environment values by i2c
-envVals.push(0);
-var timeVals = [];
-timeVals.push(getTime());
-var rawBufSize = screenW;
+
+class CircBuf {
+  constructor(bufSize) {
+    this.size = bufSize;
+    this.valArr = new Array(bufSize);
+    this.idx = 0;
+
+    this.getVal = function(n) { 
+    /**
+     * Return the value stored in position n in the buffer.
+     */
+
+      let i = n + this.idx;
+      if (i>=this.valArr.length)
+          i = i - this.valArr.length;
+      return(this.valArr[i]);
+    };
+
+    this.setVal = function(val) {
+      /**
+       * Add value val to the end of the buffer
+       */
+      this.valArr[this.idx] = val;
+      this.idx++;
+      if (this.idx == this.valArr.length)
+        this.idx = 0
+    };
+
+    this.getLastVal = function() {
+      /**
+       * get the last value added to the buffer
+       */
+      if (this.idx > 0)
+        return this.valArr[this.idx-1];
+      else
+        return this.valArr[this.valArr.length -1];
+    };
+
+    this.getFirstVal = function() {
+      /**
+       * get the first value in the buffer
+       */
+      // FIXME - this is only correct once the buffer is full
+      return this.valArr[this.idx];
+    };
+
+    this.getMaxMinVals = function() {
+      /**
+       * return [minVal, maxVal] for the buffer.
+       */
+      let i = 0;
+      let minVal = this.valArr[0];
+      let maxVal = this.valArr[0];
+      for (i=0;i<this.size;i++) {
+        if (this.valArr[i]<minVal)
+          minVal = this.valArr[i];
+        if (this.valArr[i]>maxVal)
+          maxVal = this.valArr[i];
+      }
+      return [minVal, maxVal];
+    }
+  }
+}
+
+
+
+// Circular buffers to store data for plotting on the screen
+var RAW_BUF_SIZE = screenW;
+var rawBuf = new CircBuf(RAW_BUF_SIZE);
+var anlgBuf = new CircBuf(RAW_BUF_SIZE);
+var envBuf = new CircBuf(RAW_BUF_SIZE);
+var timeBuf = new CircBuf(RAW_BUF_SIZE);
+
 
 var ledCurrentVals = [0x30, 0x50, 0x5A, 0xE0];
 var ledCurrentIdx = 0;
 
 var slot0LedCurrentVal = 15;  //64
-
 
 
 function fileExists(fName){
@@ -86,15 +150,17 @@ function drawText() {
   }
   y = y + 28;
   g.setFont("6x8", 2);
-  g.drawString(rawVals[rawVals.length -1], textOriginX + 0, y);
-  g.drawString(envVals[envVals.length -1], textOriginX + 70, y);
-  g.drawString(anlgVals[anlgVals.length -1], textOriginX + 130, y);
+  g.drawString(rawBuf.getLastVal(), textOriginX + 0, y);
+  g.drawString(envBuf.getLastVal(), textOriginX + 70, y);
+  g.drawString(anlgBuf.getLastVal(), textOriginX + 130, y);
 
   y = y + 20;
   g.setFont("6x8", 2);
   g.drawString(slot0LedCurrentVal, textOriginX + 0, y);
   g.drawString(ledCurrentIdx, textOriginX + 70, y);
-  g.drawString((timeVals[timeVals.length-1]-timeVals[0])+"s", textOriginX + 130, y);
+  let t0 = timeBuf.getFirstVal()
+  let t1 = timeBuf.getLastVal();
+  g.drawString(Math.round(t1-t0)+"s", textOriginX + 130, y);
 
   //g.setFont("6x8", 2);
   //g.setFontAlign(-1, -1);
@@ -106,7 +172,8 @@ function drawText() {
   //g.setFont("6x8", 4);
   //g.drawString("^",screenSize/2 , 150);
 
-  drawGraph();
+  // commented out because drawGraph takes 2 seconds to run
+  //drawGraph();
   g.flip();
 }
 
@@ -114,20 +181,19 @@ function drawText() {
 function drawGraph() {
   let i = 0;
   let y = 0;
+  let tStartg = getTime();
   //g.clear();
   g.clearRect(graphOriginX,graphOriginY,graphOriginX + graphW, graphOriginY + graphH);
 
   // Draw raw values as solid bars
-  let minVal = rawVals[0];
-  let maxVal = minVal;
-  for (i=0;i<rawVals.length; i++) {
-    if (rawVals[i]<minVal) minVal = rawVals[i];
-    if (rawVals[i]>maxVal) maxVal = rawVals[i];
-  }
+  let minMaxVals = rawBuf.getMaxMinVals();
+  let minVal = minMaxVals[0];
+  let maxVal = minMaxVals[1];
   let yMin = screenH;
   let yMax = graphOriginY;
-  for (i=0;i<rawVals.length-1; i++) {
-    y = yMin + (rawVals[i]-minVal)*(yMax-yMin)/(maxVal-minVal);
+  for (i=0;i<rawBuf.size -1; i++) {
+    var rawVal = rawBuf.getVal(i);
+    y = yMin + (rawVal-minVal)*(yMax-yMin)/(maxVal-minVal);
     if (y < yMax) y = yMax;   // Screen is inverted, so comparison looks wrong!
     if (y > yMin) y = yMin;
     g.setColor('#ff0000').drawRect(i,yMin,i+1,y);
@@ -139,6 +205,7 @@ function drawGraph() {
     +", y="+y);
 
     // Draw analogue values as a line
+    /*
     minVal = anlgVals[0];
     maxVal = minVal;
     for (i=0;i<anlgVals.length; i++) {
@@ -153,7 +220,9 @@ function drawGraph() {
       g.setColor('#000000').drawLine(lastPoint[0],lastPoint[1],i+1,y);
       lastPoint=[i, y];
     }
-  
+   */
+  let tEndg = getTime();
+  console.log("drawGraph took "+(tEndg-tStartg).toFixed(3)+" sec");
 }
 
 function setLedCurrent() {
@@ -165,9 +234,17 @@ function setLedCurrent() {
 function getLedCurrent() {
   /**
    * Read the LED current registers from the HRM and populate the relevant global variables.
+   * We catch errors and re-start the HRM if we get an error, because occasional i2c errors
+   * during this call will freeze the HRM.
    */
-  slot0LedCurrentVal = Bangle.hrmRd(0x17,0);
-  ledCurentIdx = Bangle.hrmRd(0x19);
+  try {
+    slot0LedCurrentVal = Bangle.hrmRd(0x17,0);
+    ledCurentIdx = Bangle.hrmRd(0x19);
+  } catch (e) {
+    console.log("getLedCurrent - ERROR: "+e);
+    console.log("getLedCurrent - Re-Starting HRM");
+    initialiseHrm();
+  }
 }
 
 function changeLedCurrent(changeVal) {
@@ -200,12 +277,14 @@ function changeSlot0Current(changeVal) {
 
 function initialiseHrm() {
   Bangle.setLCDPower(1);
+  // Power cycle HRM
+  Bangle.setHRMPower(0);
   Bangle.setHRMPower(1);
   Bangle.setOptions({
     backlightTimeout:0,
     powerSave:false,
     hrmPushEnv:true,
-    hrmGreenAdjust: true
+    hrmGreenAdjust: false
   });
   setLedCurrent();
 
@@ -294,38 +373,34 @@ Bangle.on("swipe",function(directionLR, directionUD){
         changeLedCurrent(-1);
      }
     else if (directionUD ==1){
-      changeSlot0Current(5);
+      changeSlot0Current(1);
     }
     else if (directionUD == -1) {
-      changeSlot0Current(-5);
+      changeSlot0Current(-1);
     }
   });
 
 console.log("Registering raw hrm data callback");
 Bangle.on('HRM-raw', function (hrm) {
         let value = hrm.raw;
-        let filt = hrm.filt;
-        let valueA = Math.round(analogRead(29)* 16383);
-        rawVals.push(value); 
-        anlgVals.push(valueA);
-        timeVals.push(getTime());
-        if (rawVals.length > rawBufSize) {
-          rawVals.shift();
-          anlgVals.shift();
-          timeVals.shift();
-        }
-        file.write(timeVals[timeVals.length-1] + "," + value + "," + filt 
-                + "," + valueA + "," + envVals[envVals.length-1] + "," + HRVal + "," + HRConfidence + "\n");
+        let filt = 0;
+        //filt = hrm.filt;
+        valueA = Math.round(analogRead(29)* 16383);
+        rawBuf.setVal(value);
+        timeBuf.setVal(getTime());
+        console.log("HRM-raw - dt="+(timeBuf.getLastVal() - lastRawTime).toFixed(3)+" s: val="+value);
+        lastRawTime = timeBuf.getLastVal();
+        file.write(timeBuf.getLastVal() + "," + value + "," + filt 
+                + "," + valueA + "," + envBuf.getLastVal() + "," 
+                + HRVal + "," + HRConfidence + "\n");
 });
 
 console.log("Registering hrm environment data callback");
 Bangle.on('HRM-env', function (hrm) {
         let value = hrm;
-        envVals.push(value); 
-        if (envVals.length > rawBufSize) {
-          envVals.shift();
-        }
+        envBuf.setVal(value);
 });
+
 
 
 
